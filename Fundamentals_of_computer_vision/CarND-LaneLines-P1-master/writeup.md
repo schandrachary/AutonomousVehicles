@@ -20,6 +20,7 @@ First, I converted the images to grayscale. A gray scale image looks like this:
 ![image](https://user-images.githubusercontent.com/8539470/83980667-917bac80-a8e5-11ea-8bc9-39204e1bd023.png)
 
 Then, I blurred the image using gaussian_blur() with a kernel size of 5. Next, I detected the edges using canny edge detection. This returns the edges in the image which has a steep color gradient. Here's how the output of canny edge detection look like:
+
 ![image](https://user-images.githubusercontent.com/8539470/83980694-bd972d80-a8e5-11ea-936d-ae260e701d64.png)
 
 Next, we want to isoloate lane information in the image from the noise. Here the noise would be everything but the lane lines. To do that, we mask the image to focus only on the ground and eliminate the rest from the image. This is the output of masking the image in my pipeline:
