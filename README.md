@@ -1,4 +1,4 @@
-# AutonomousVehicles
+# Autonomous Vehicles
 Udacity Nano-Degree program on Autonomous Vehicles
 
 ### Lane Line Detection
