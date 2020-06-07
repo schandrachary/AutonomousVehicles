@@ -203,35 +203,13 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     # Use the beta coefficient to calculate yHat
     yHat_rightLaneLine = np.matmul(X_rightLaneLine_extremeties, b_rightLaneLine)
     yHat_leftLaneLine = np.matmul(X_leftLaneLine_extremeties, b_leftLaneLine)   
-    
-
-    left_lane_parameters = np.hstack([leftLaneLine_x_extremeties, yHat_leftLaneLine], dtype=[('x', int), ('y', int)])
-    right_lane_parameters = np.hstack([rightLaneLine_x_extremeties, yHat_rightLaneLine], dtype=[('x', int), ('y', int)])
-    print('Left lane parameters: {}'.format(left_lane_parameters))
-    left_lane_parameters = np.sort(left_lane_parameters, axis=0, order='x')
-    right_lane_parameters = np.sort(right_lane_parameters, axis=0, order='x')
-    print('Left lane parameters after sort: {}'.format(left_lane_parameters))
-    input("Press to continue...")
-
-    # sort before drawing the line
-    # rightLaneLine_x_extremeties = np.sort(rightLaneLine_x_extremeties,axis=0)
-    # yHat_rightLaneLine = np.sort(yHat_rightLaneLine,axis=0)
-    # leftLaneLine_x_extremeties = np.sort(leftLaneLine_x_extremeties,axis=0)
-    # yHat_leftLaneLine = np.sort(yHat_leftLaneLine,axis=0)
-
-    # print('Left lane design matrix {}. Size: {}'.format(X_leftLaneLine_extremeties, X_leftLaneLine_extremeties.shape))
-    # #print('Left lane xdata {}. size: {}'.format(leftLaneLine_x, leftLaneLine_x.shape))
-    # print('Left lane xdata {}. size: {}'.format(leftLaneLine_x_extremeties, leftLaneLine_x_extremeties.shape))
-    # print('Left yHat lane ydata {}. Size: {}'.format(yHat_leftLaneLine, yHat_leftLaneLine.shape))
-    # input("Press to continue...")
 
     for i in range(yHat_rightLaneLine.size-1):
         cv2.line(img, (rightLaneLine_x_extremeties[i], yHat_rightLaneLine[i]), (rightLaneLine_x_extremeties[i+1], yHat_rightLaneLine[i+1]), color, thickness=10)
     
     for i in range(yHat_leftLaneLine.size-1):
         cv2.line(img, (leftLaneLine_x_extremeties[i], yHat_leftLaneLine[i]), (leftLaneLine_x_extremeties[i+1], yHat_leftLaneLine[i+1]), color, thickness=10)         
-
-    
+   
     
 def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
     """
@@ -241,8 +219,8 @@ def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
     """
     lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]), minLineLength=min_line_len, maxLineGap=max_line_gap)
     line_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
-    #draw_lines(line_img, lines)
-    draw_polyfit_lines(line_img, lines)
+    draw_lines(line_img, lines)
+    #draw_polyfit_lines(line_img, lines)
     #draw_curved_lines(img, lines)
     return line_img
 
@@ -265,12 +243,13 @@ def process_image(image):
     # NOTE: The output you return should be a color image (3 channel) for processing video below
     # TODO: put your pipeline here,
     # you should return the final output (image where lines are drawn on lanes)
-    
-    #print('This image is:', type(image), 'with dimensions:', image.shape)
+
+    # Take graysclae of the image first
+    gray = grayscale(image)
 
     # Lets perform Canny Edge detection now
     kernel_size = 5
-    blur_image = gaussian_blur(image, kernel_size)
+    blur_image = gaussian_blur(gray, kernel_size)
 
     # Run Canny on the blurred image
     low_threshold = 50
@@ -279,8 +258,6 @@ def process_image(image):
     
     # Create a masked image with vertices of a polygon
     imshape = image.shape
-    # vertices = np.array([[(50, imshape[0]), (450, 330), (510, 330), (imshape[1]-50, imshape[0])]])
-    # vertices = np.array([[(200, 650), (550, 435), (700, 435), (1050, 650)]])
     vertices = np.array([[(140, 650), (644, 441), (724, 441), (1096, 650)]])
     masked_edges = region_of_interest(edges, vertices)
     plt.imshow(masked_edges, cmap='gray')
@@ -297,22 +274,8 @@ def process_image(image):
     # Create a color binary image to combine with the line_image
     color_edges = np.dstack((edges, edges, edges))
     lines_edges = weighted_img(line_image, image)
-    # plt.imshow(lines_edges)
-    # plt.show()
     
     return lines_edges
-
-
-# process all the images in the test directory
-# import glob
-# import os
-# for image in glob.glob('test_images/*.jpg'):
-#     img = cv2.imread(image)
-#     print('Processing image {}'.format(image))
-#     filename = image.split('\\')[1]
-#     lines = process_image(img)
-#     if not cv2.imwrite('test_image_output/'+filename,lines):
-#         raise Exception("Could not write image")
 
 challenge_output = 'test_videos_output/challenge.mp4'
 ## To speed up the testing process you may want to try your pipeline on a shorter subclip of the video

@@ -6,15 +6,10 @@ import cv2
 # Import everything needed to edit/save/watch video clips
 from moviepy.editor import VideoFileClip
 from IPython.display import HTML
-
-#reading in an image
-image = mpimg.imread('test_images/solidWhiteRight.jpg')
-
-#printing out some stats and plotting
-print('This image is:', type(image), 'with dimensions:', image.shape)
-plt.imshow(image)  # if you wanted to show a single color channel image called 'gray', for example, call as plt.imshow(gray, cmap='gray')
-
 import math
+# imports to grab all the images from a dir
+import glob
+import os
 
 def grayscale(img):
     """Applies the Grayscale transform
@@ -61,19 +56,19 @@ def region_of_interest(img, vertices):
 
 
 def draw_curved_lines(img, lines, color=[255, 0, 0], thickness=10):
-	line_image = np.copy(img)*0
-	# Iterate over the output "lines" and draw lines on a blank image
-	for line in lines:
-	    for x1,y1,x2,y2 in line:
-	        cv2.line(img,(x1,y1),(x2,y2),(255,0,0),10)
+    line_image = np.copy(img)*0
+    # Iterate over the output "lines" and draw lines on a blank image
+    for line in lines:
+        for x1,y1,x2,y2 in line:
+            cv2.line(img,(x1,y1),(x2,y2),(255,0,0),10)
 
-	# Draw the lines on the edge image
-	lines_edges = cv2.addWeighted(img, 0.8, img, 1, 0) 
-	plt.imshow(lines_edges)
-	plt.show()
+    # Draw the lines on the edge image
+    lines_edges = cv2.addWeighted(img, 0.8, img, 1, 0) 
+    plt.imshow(lines_edges)
+    plt.show()
 
-def draw_polyfit_lines(img,lines, color=[255, 0, 0], thickness=10):
-	leftLaneLine_x = np.array([])
+def draw_polyfit_lines(img, lines, color=[255, 0, 0], thickness=10):
+    leftLaneLine_x = np.array([])
     leftLaneLine_y = np.array([])
     rightLaneLine_x = np.array([])
     rightLaneLine_y = np.array([])
@@ -109,10 +104,10 @@ def draw_polyfit_lines(img,lines, color=[255, 0, 0], thickness=10):
     right_lane_x = np.linspace(724, 1096, 300)
 
     for i in range(left_lane_x.size-1):
-    	cv2.line(img, (left_lane_x[i], poly_left(left_lane_x[i])), (left_lane_x[i+1], poly_left(left_lane_x[i+1])), color, thickness)
+        cv2.line(img, (left_lane_x[i], poly_left(left_lane_x[i])), (left_lane_x[i+1], poly_left(left_lane_x[i+1])), color, thickness)
 
     for i in range(right_lane_x.size-1):
-    	cv2.line(img, (right_lane_x[i], poly_right(right_lane_x[i])), (right_lane_x[i+1], poly_right(right_lane_x[i+1])), color, thickness)
+        cv2.line(img, (right_lane_x[i], poly_right(right_lane_x[i])), (right_lane_x[i+1], poly_right(right_lane_x[i+1])), color, thickness)
 
 def draw_lines(img, lines, color=[255, 0, 0], thickness=10):
     """
@@ -197,12 +192,6 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=10):
 
     yHat_rightLaneLine = np.matmul(X_rightLaneLine_extremeties, b_rightLaneLine)
     yHat_leftLaneLine = np.matmul(X_leftLaneLine_extremeties, b_leftLaneLine)
-
-    # sort before drawing the line
-    # rightLaneLine_x_extremeties = rightLaneLine_x_extremeties.sort()
-    # yHat_rightLaneLine = yHat_rightLaneLine.sort()
-    # leftLaneLine_x_extremeties = leftLaneLine_x_extremeties.sort()
-    # yHat_leftLaneLine = yHat_leftLaneLine.sort()
     
     for i in range(yHat_rightLaneLine.size-1):
         cv2.line(img, (rightLaneLine_x_extremeties[i], yHat_rightLaneLine[i]), (rightLaneLine_x_extremeties[i+1], yHat_rightLaneLine[i+1]), color, thickness=10)
@@ -243,10 +232,13 @@ def process_image(image):
     # NOTE: The output you return should be a color image (3 channel) for processing video below
     # TODO: put your pipeline here,
     # you should return the final output (image where lines are drawn on lanes)
+
+    # Take graysclae of the image first
+    gray = grayscale(image)
     
-    # Lets perform Canny Edge detection now
+    # Lets perform Canny Edge detection now. But first, blur the image
     kernel_size = 5
-    blur_image = gaussian_blur(image, kernel_size)
+    blur_image = gaussian_blur(gray, kernel_size)
 
     # Run Canny on the blurred image
     low_threshold = 50
@@ -276,12 +268,35 @@ def process_image(image):
     return lines_edges
 
 # process all the images in the test directory
-import glob
-import os
-for image in glob.glob('test_images/*.jpg'):
-    img = cv2.imread(image)
-    print('Processing image {}'.format(image))
-    filename = image.split('\\')[1]
-    lines = process_image(img)
-    if not cv2.imwrite('test_image_output/'+filename,lines):
-        raise Exception("Could not write image")
+# for image in glob.glob('test_images/*.jpg'):
+#     img = cv2.imread(image)
+#     print('Processing image {}'.format(image))
+#     filename = image.split('/')[1]
+#     lines = process_image(img)
+#     if not cv2.imwrite('test_image_output/'+filename,lines):
+#         raise Exception("Could not write image")
+
+
+
+white_output = 'test_videos_output/solidWhiteRight.mp4'
+## To speed up the testing process you may want to try your pipeline on a shorter subclip of the video
+## To do so add .subclip(start_second,end_second) to the end of the line below
+## Where start_second and end_second are integer values representing the start and end of the subclip
+## You may also uncomment the following line for a subclip of the first 5 seconds
+#clip1 = VideoFileClip("test_videos/solidWhiteRight.mp4").subclip(0,5)
+clip1 = VideoFileClip("test_videos/solidWhiteRight.mp4")
+white_clip = clip1.fl_image(process_image) #NOTE: this function expects color images!!
+white_clip.write_videofile(white_output, audio=False)
+
+
+yellow_output = 'test_videos_output/solidYellowLeft.mp4'
+## To speed up the testing process you may want to try your pipeline on a shorter subclip of the video
+## To do so add .subclip(start_second,end_second) to the end of the line below
+## Where start_second and end_second are integer values representing the start and end of the subclip
+## You may also uncomment the following line for a subclip of the first 5 seconds
+##clip2 = VideoFileClip('test_videos/solidYellowLeft.mp4').subclip(0,5)
+clip2 = VideoFileClip('test_videos/solidYellowLeft.mp4')
+yellow_clip = clip2.fl_image(process_image)
+yellow_clip.write_videofile(yellow_output, audio=False)
+
+
