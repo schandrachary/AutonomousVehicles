@@ -18,7 +18,7 @@ import cv2
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-image = mpimg.imread('../test_images/test5.jpg')
+image = mpimg.imread('../test_images/test2.jpg')
 img_size = (image.shape[1], image.shape[0])
 # Source and destination points for perspective transform
 source = np.float32([[260,688], [601,445], [675,445], [1030,688]])
@@ -68,19 +68,24 @@ def perspectiveTransform(undistored_binary, img_size, source, destination):
     return warped
 
 
-# Undistort the incoming image
-undistort = distortionCorrection(image)
+# # Undistort the incoming image
+# undistort = distortionCorrection(image)
 
-# Pass in undistorted image to perform thresolding
-undistored_binary = colorAndGradientThreshold(undistort)
-warped_binary = perspectiveTransform(undistored_binary, img_size, source, destination)
+# # Pass in undistorted image to perform thresolding
+# undistored_binary = colorAndGradientThreshold(undistort)
+# warped_binary = perspectiveTransform(undistored_binary, img_size, source, destination)
+# # Uncomment the below two lines to save a color warped image
+# # warped_binary = perspectiveTransform(image, img_size, source, destination)
+# # plt.imsave("../output_images/warped_color.jpg", warped_binary)
 
-# Save the binary image in the output_images dir
-plt.imsave("../output_images/warped_binary.jpg", warped_binary, cmap='gray')
-#with open("../output_images/warped_binary", "wb") as outfile:
-#    outfile.write(warped_binary)
+# # Save the binary image in the output_images dir
+# plt.imsave("../output_images/dist_corrected.jpg", undistort)
+# plt.imsave("../output_images/warped_binary.jpg", warped_binary, cmap='gray')
+# plt.imsave("../output_images/original_image.jpg", image)
+# plt.imsave("../output_images/color_gradient_thresh.jpg", undistored_binary, cmap='gray')
 
-# Plot the result
+
+# #Plot the result
 # f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(30, 9))
 # f.tight_layout()
 
