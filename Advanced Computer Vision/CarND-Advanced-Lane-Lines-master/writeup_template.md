@@ -20,9 +20,9 @@ The goals / steps of this project are the following:
 [image1]: ./camera_cal/test_image3.jpg "Distorted"
 [undist]: ./camera_cal/test_undist.jpg "Undistorted"
 [persp]: ./camera_cal/undistorted_warped.jpg "PerspTrans"
-[distCorrect]: ./camera_cal/dist_corrected.jpg "Dist Corrected"
-[comparison]: ./camera_cal/color_and_gradent_thresolding.jpg "comparison"
-[colorGrad]: ./camera_cal/color_gradient_thresh.jpg "Thresholdin"
+[distcorr]: ./output_images/dist_corrected.jpg "distCorrection"
+[comparison]: ./output_images/color_and_gradent_thresolding.jpg "comparison"
+[colorGrad]: ./output_images/color_gradient_thresh.jpg "Thresholdin"
 [image2]: ./test_images/test1.jpg "Road Transformed"
 [image3]: ./examples/binary_combo_example.jpg "Binary Example"
 [image4]: ./examples/warped_straight_lines.jpg "Warp Example"
@@ -39,19 +39,14 @@ The goals / steps of this project are the following:
 
 The code for this step is contained in two files: [cameraCalibration.py](https://github.com/schandrachary/AutonomousVehicles/blob/advanced_computer_vision/Advanced%20Computer%20Vision/CarND-Advanced-Lane-Lines-master/source/cameraCalibration.py) and [distortionCorrection.py](https://github.com/schandrachary/AutonomousVehicles/blob/advanced_computer_vision/Advanced%20Computer%20Vision/CarND-Advanced-Lane-Lines-master/source/distortionCorrection.py). 
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection. Here's the distorted image that was chosen to be corrected: 
- 
+I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection. Here's the distorted image that was chosen to be corrected:  
  ![alt text][image1]
  
 `cameraCalibration.py` runs through all the images in `camera_cal` directory and stores image and object points for each of them. And then, those points are used in `distortionCorrection.py` to calibrate the camera and get the camera matrix and distortion coefficients. Using this, a test image is undistorted and chess board coners are found on the undistorted image. Here's the output image after undistortion:
-
 ![alt text][undist]
 
 The final step of this process is to get a warped image using perspective transform. Perspective transform is performed down the line in the pipeline after performing thresholding on the images, but here's how a perspective transform would look like in comparison to original and undistorted image:
-
-![alt_text][persp]
-
-
+![alt text][persp]
 
 
 ### Pipeline (single images)
@@ -59,7 +54,7 @@ The final step of this process is to get a warped image using perspective transf
 #### 1. Provide an example of a distortion-corrected image.
 
 Like explained in the above distortion correction step, the input image is corrected for distortion and an output of that looks like this:
-![alt text][distCorrect]
+![alt text][distcorr]
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
