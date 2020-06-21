@@ -204,9 +204,9 @@ def text(frame, text, x, y):
     cv2.putText(frame, text, (x, y), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255,255,255), 2)
 
 # Run a given video file
-output_video = '../output_images/challenge_video_output.mp4'
+output_video = '../output_images/project_video_output.mp4'
 #  clip1 = VideoFileClip("../project_video.mp4").subclip(0,5)
-clip1 = VideoFileClip("../challenge_video.mp4")
+clip1 = VideoFileClip("../project_video.mp4")
 project_clip = clip1.fl_image(processImages)
 project_clip.write_videofile(output_video, audio=False)
 

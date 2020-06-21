@@ -44,7 +44,6 @@ class Line():
         self.best_fit.append(np.polyfit(self.ally, self.allx, 2))
 
     def generatePoints(self, xm_per_pix):
-        # ploty = np.linspace(0, self.height-1, self.height)
         # Get a best fit which is an average of last n iterations
         fit = np.array(self.best_fit).mean(axis=0)
         self.fitx = fit[0]*self.ploty**2 + fit[1]*self.ploty + fit[2]
