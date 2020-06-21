@@ -23,6 +23,9 @@ The goals / steps of this project are the following:
 [distcorr]: ./output_images/dist_corrected.jpg "distCorrection"
 [comparison]: ./output_images/color_and_gradent_thresolding.jpg "comparison"
 [colorGrad]: ./output_images/color_gradient_thresh.jpg "Thresholdin"
+[drivable]: ./output_images/drivable_area.png "drivable"
+
+[lines]: ./output_images/linesFound.jpg "Lines"
 [image2]: ./test_images/test1.jpg "Road Transformed"
 [image3]: ./examples/binary_combo_example.jpg "Binary Example"
 [image4]: ./examples/warped_straight_lines.jpg "Warp Example"
@@ -64,8 +67,6 @@ I used a combination of color and gradient thresholds to generate a binary image
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points. 
-
 The code for perspective transform is performed in `thresholding.py` starting on line 64. By passing in source and desination points like below to `cv2.getPerspectiveTransform()` function, yields a transformation matrix. We can use that matrix to warp an image. I chose the hardcode the source and destination points in the following manner:
 
 ```python
@@ -83,25 +84,38 @@ This resulted in the following source and destination points:
 | 675, 445      | 1000, 0       |
 | 1030, 688     | 1000, 720     |
 
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image. Here's a comparision of all the steps thus far:
+I verified that my perspective transform was working as expected by drawing the `source` and `destination` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image. Here's a comparision of all the steps thus far:
 
 ![alt text][comparison]
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+The code for finding lane line pixels in located in [lineDetection.py](https://github.com/schandrachary/AutonomousVehicles/blob/advanced_computer_vision/Advanced%20Computer%20Vision/CarND-Advanced-Lane-Lines-master/source/lineDetection.py), in a conveniently located function called `findLanePixels()` in line 86. This function can be called by passing in a warped, thresholed, binary image. This function is called by `fitPolynomial()` function in line 163. Most of the line finding functionality is happening between these two functions. And [line.py](https://github.com/schandrachary/AutonomousVehicles/blob/advanced_computer_vision/Advanced%20Computer%20Vision/CarND-Advanced-Lane-Lines-master/source/line.py) is a `Line` Class that holds the properties of a line and also performs some functions and store the relevant attributes from them. 
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+While implementing  `findLanePixels`, I noticed that during the histogram step, in line 88, there is a possibility to pick up shadow from trees as lane lines. To address this issue, I focused on getting the histogram of bottom half of the image that is `offset` away from the center of the lane. This offset is calculated in line 93 through 95.
 
-![alt text][image5]
+Finding lane pixels is performed through sliding window algorithm. This happens in lines 111 through 144. The for loop here looks for all the pixles that are contained in a given window. If more than `minpix=50` number of pixels are found in a given box, the location of the window is adjusted to be mean of pixels. 
+
+After finding the pixels belonging for each of the lines, polynomial can be fit through all of those pixels using `fitPolynomial()` that calls the method that is defined in `line.py`. Line class fits the polynomial and the returned polynomial coefficients are stored in `self.best_fit` attribute which stores coefficients for the last 10 frames. 
+
+So, the next time around we generate points to draw the lines, generated points will be using the mean coefficients of last `n` frames. This helps the lane detecions to be not reactive to perturbation in the detection step. This gives us a smooth lane detection and rejects outliers
+
+The final output video is posted at the bottom of this write up, here is an image that shows the output of sliding window algorithm to detect lane line pixels
+
+![alt text][lines]
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+Radius of curvature is calulated in `line.py` in function `radiusOfCurvature()`. It fits a new polynomial to `self.fity` values that were already calculated in `generatePoints()`. Using `image.shape[0]` as the y-evaluation points, radius is calculated inline 67. 
+
+Position of the vehicle with respect to recenter is calculated in `generatePoints()` section in `line.py`, starting on line 52. This is considering that the camera is mounted exactly at the center of the ego-vehicle. 
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+The visulazation process of this project is happening in file `lineDetection.py` from lines 48 through 81. First, I draw a drivable surface area between the two detected lines using `cv2.fillPoly()`, this is the green region in the image below. This image at this point is not plotted back down onto the road. To do that, we need to perform inverse perspective transform. For this we will use the same `source` and `destination` points as we did in the initial steps. Using `getPerspectiveTransform()` gives us an inverse matrix which we can use to get a new warped image. 
 
-![alt text][image6]
+Radius of curvature and Distance from center is displayed on the top left of the screen. The window on the top right corner shows sliding window algorithm.
+
+![alt text][drivable]
 
 ---
 
@@ -109,7 +123,7 @@ I implemented this step in lines # through # in my code in `yet_another_file.py`
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./output_images/project_video_output_good.mp4)
 
 ---
 
