@@ -20,6 +20,9 @@ The goals / steps of this project are the following:
 [image1]: ./camera_cal/test_image3.jpg "Distorted"
 [undist]: ./camera_cal/test_undist.jpg "Undistorted"
 [persp]: ./camera_cal/undistorted_warped.jpg "PerspTrans"
+[distCorrect]: ./camera_cal/dist_corrected.jpg "Dist Corrected"
+[comparison]: ./camera_cal/color_and_gradent_thresolding.jpg "comparison"
+[colorGrad]: ./camera_cal/color_gradient_thresh.jpg "Thresholdin"
 [image2]: ./test_images/test1.jpg "Road Transformed"
 [image3]: ./examples/binary_combo_example.jpg "Binary Example"
 [image4]: ./examples/warped_straight_lines.jpg "Warp Example"
@@ -55,44 +58,39 @@ The final step of this process is to get a warped image using perspective transf
 
 #### 1. Provide an example of a distortion-corrected image.
 
-To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![alt text][image2]
+Like explained in the above distortion correction step, the input image is corrected for distortion and an output of that looks like this:
+![alt text][distCorrect]
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+I used a combination of color and gradient thresholds to generate a binary image, and all these steps are performed in [this]((https://github.com/schandrachary/AutonomousVehicles/blob/c3ea8010675b3bb70fb8ca183ece17fbef46c0ec/Advanced%20Computer%20Vision/CarND-Advanced-Lane-Lines-master/source/thresholding.py#L37)) function. First, I applied sobel operator on the v-channel of HSV color space. This is does in line 40 through 48. Then I perform gradient thresholding on scaled sobel image. This is done in line 50 through 52. Now that I have sobel and a thresholded image, the next step is to get the best of both of these worlds. So I combine these two images in lines 54 through 61.  Here's an example of my output for this step.
 
-![alt text][image3]
+![alt text][colorGrad]
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points. 
+
+The code for perspective transform is performed in `thresholding.py` starting on line 64. By passing in source and desination points like below to `cv2.getPerspectiveTransform()` function, yields a transformation matrix. We can use that matrix to warp an image. I chose the hardcode the source and destination points in the following manner:
 
 ```python
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
+img_size = (image.shape[1], image.shape[0])
+source = np.float32([[260,688], [601,445], [675,445], [1030,688]])
+destination = np.float32([[345, img_size[1]], [345, 0], [1000, 0], [1000, img_size[1]]])
 ```
 
 This resulted in the following source and destination points:
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+| 260, 688      | 345, 720      | 
+| 601, 445      | 345, 0        |
+| 675, 445      | 1000, 0       |
+| 1030, 688     | 1000, 720     |
 
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
+I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image. Here's a comparision of all the steps thus far:
 
-![alt text][image4]
+![alt text][comparison]
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
