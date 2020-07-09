@@ -79,6 +79,8 @@ Here is an example of an original image and an augmented image:
 ![alt text][image2]
 ![alt text][image4]
 
+Although the resolution of the augmented image remains the same, I have introduced rotation and translation, which will be important when the car drives around in the real world and images are captured from an angel. When trained on these images, it is expected that the model generalizes for varying images of a particular class, striving for stretch pants solution without having to collect more data. 
+
 A summary statistics of the augmented dataset:
 
 * The size of augmented training set is 67415
@@ -206,4 +208,4 @@ Lets dig a little deeper. Lets take a look at 15 layer featuremap output of seco
 
 <img src="./writeup_images/featuremap2_pool.png" alt="drawing" width="650"/>
 
-It appears that in the second layer, CNN is picking up on lower level details of the image, like gradients. 
+It appears that in the second layer, CNN is picking up on lower level details of the image, like gradients.
