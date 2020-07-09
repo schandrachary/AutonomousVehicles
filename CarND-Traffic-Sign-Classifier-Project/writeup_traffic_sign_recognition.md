@@ -30,13 +30,6 @@ The goals / steps of this project are the following:
 [image8]: ./test_images/original_images/pedestrian.png "pedestrian"
 [image9]: ./test_images/original_images/30kmph.png "30kmph"
 
-[image3]: ./examples/random_noise.jpg "Random Noise"
-[image4]: ./examples/placeholder.png "Traffic Sign 1"
-[image5]: ./examples/placeholder.png "Traffic Sign 2"
-[image6]: ./examples/placeholder.png "Traffic Sign 3"
-[image7]: ./examples/placeholder.png "Traffic Sign 4"
-[image8]: ./examples/placeholder.png "Traffic Sign 5"
-
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/481/view) individually and describe how I addressed each point in my implementation.  
 
@@ -103,23 +96,22 @@ My final model consisted of the following layers:
 
 | Layer         		|     Description	        					|
 |:---------------------:|:---------------------------------------------:|
-| Input         		  | 32x32x3 RGB image   							              |    
+| Input         		  | 32x32x1 grayscale image   							        |    
 | Convolution 5x5     | 1x1 stride, valid padding, outputs 28x28x6 	    |
 | RELU					      |												                          |
 | Max pooling	      	| 2x2 stride, 2x2 size, outputs 14x14x6	          |
 | Convolution 5x5	    | 1x1 stride, valid padding, outputs 10x10x16     |
 | RELU					      |												                          |
 | Max pooling	      	| 2x2 stride, 2x2 size, outputs 5x5x16	          |
-| Fully connected		  | 400 input, output 120					                  |
+| Fully connected		  | 400 input, output size 120					            |
 | RELU					      |												                          |
 | Dropout					    | 60%												                      |
-| Fully connected		  | 120 input, output 84					                  |
+| Fully connected		  | 120 input, output size 84					              |
 | RELU					      |												                          |
 | Dropout					    | 60%												                      |
-| Fully connected		  | 84 input, output 10					                    |
-| Softmax				      | output Probabilities 					                  |
-|	Cross Entropy				|	output Loss											|
-|	Optimizer 					|	Adam's optimizer											|
+| Fully connected		  | 84 input, output size 10					              |
+| Softmax				      | output Probabilities, output size 10            |
+|	Cross Entropy				|	output Loss, output size 10											|
 
 
 
@@ -127,16 +119,16 @@ My final model consisted of the following layers:
 
 To train the model, I experimented with various hyperparameters, but here are the ones I settled on since it gave me the best result:
 1. Batch size: 128
-2. Epoch: 50
+2. Epoch: 30
 3. Learning rate: 0.00095
 4. Dropout 0.60
 
 #### 4. Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
 
 My final model results were:
-* training set accuracy of 98.9%
-* validation set accuracy of 95.9%
-* test set accuracy of 93.6%
+* training set accuracy of 98.0%
+* validation set accuracy of 94.8%
+* test set accuracy of 94.0%
 
 ![alt text][image6]
 
@@ -167,28 +159,28 @@ Here are the results of the prediction:
 | Animal Crossing     		| Animal Crossing 										|
 | Stright or left					| Stright or left											|
 | 30 km/h	      		     | 30 km/h					 				|
-| Pedestrian			       | Pedestrian      							|
+| Pedestrian			       | Road narrows on the right    							|
 
 
-The model was able to correctly guess 5 of the 5 traffic signs, which gives an accuracy of 100%. This exceeds the accuracy on the test set. I believe this model has been trained well to be generalized to new set of images.
+The model was able to correctly guess 4 out of the 5 traffic signs, which gives an accuracy of 80%. I believe this model has been trained well to be generalized to new set of images but it also did poorly on images that have similar structure. As you can see, the top guess for pedestrian is 24, which is "Road narrows on the right". Guess no. 24 has long lines which was trained as legs on a person. Down below I plot featuremaps of this image.
 
-Here's what this model is predicting as its top 3 choices for every class:
+Here's what this model is predicting as its top 5 choices for every class:
 
-<img src="./writeup_images/top_k.png" alt="drawing" height="950"/>
+<img src="./writeup_images/top_k_5.png" alt="drawing" height="950"/>
 
 
 #### 3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
 
 The code for making predictions on my final model is located in the Analyze Perfomace section of Ipython notebook
 
-The model is very certain for all of the test images. The top five soft max probabilities were
+The model is 80% certain for test images. The top five soft max probabilities were
 
 | Probability         	|     Prediction	        					|
 |:---------------------:|:---------------------------------------------:|
 | 1.0         			| Stright or left   									|
 | 0.99     				| 30 km/h 										|
-| 0.99					| Pedestrian											|
-| 1.00	      			| Animal Crossing					 				|
+| 0.98					| Pedestrian											|
+| 0.97	      			| Animal Crossing					 				|
 | 0.99				    | Stop Sign      							|
 
 
@@ -197,3 +189,21 @@ The model is very certain for all of the test images. The top five soft max prob
 
 ### (Optional) Visualizing the Neural Network (See Step 4 of the Ipython notebook for more details)
 #### 1. Discuss the visual output of your trained network's feature maps. What characteristics did the neural network use to make classifications?
+
+Here I would like to discuss what CNN looks for in terms of features while classifying an image. Let's take a look at wrongly classified image, Pedestrian. The output featuremap of RELU after first convolutional layer looks like this:
+
+<img src="./writeup_images/featuremap1_relu.png" alt="drawing" width="650"/>
+
+And featuremap after max-pool looks like this:
+
+<img src="./writeup_images/featuremap1_pool.png" alt="drawing" width="650"/>
+
+It appears that first convolutional layer was doing a good job in classifying for the right class, hence we still see some activations in softmax output. It is mostly interested in hight level details of the image here, like edges, sudden changes in the gradient, etc.
+
+Lets dig a little deeper. Lets take a look at 15 layer featuremap output of second convolutional layer after RELU and Maxpool operations, respectively:
+
+<img src="./writeup_images/featuremap2_relu.png" alt="drawing" width="650"/>
+
+<img src="./writeup_images/featuremap2_pool.png" alt="drawing" width="650"/>
+
+It appears that in the second layer, CNN is picking up on lower level details of the image, like gradients. 
