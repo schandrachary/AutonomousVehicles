@@ -19,3 +19,12 @@ Udacity Nano-Degree program on Autonomous Vehicles
 2. The test images downloaded from web to test on the model is located [here](https://github.com/schandrachary/AutonomousVehicles/tree/traffic_sign_classifier/CarND-Traffic-Sign-Classifier-Project/test_images)
 3. The writeup for this project is located [here](https://github.com/schandrachary/AutonomousVehicles/blob/traffic_sign_classifier/CarND-Traffic-Sign-Classifier-Project/writeup_traffic_sign_recognition.md)
 4. Note that the pickle file with augmented data set is not uploaded on the repository due to file size constraints. If you want to download this project and run, please contact me.
+
+## Behavioral Cloning
+
+1. Source code for this project and its neural network architecture can be found inside [source](https://github.com/schandrachary/AutonomousVehicles/tree/behavioral_cloning/source) directory
+2. Data used to train the model can be found inside [data](https://github.com/schandrachary/AutonomousVehicles/tree/behavioral_cloning/data) directory
+3. A writeup for this project can be in the markdown file named writeup_behavioral_cloning
+4. The images used for the writeup can be found in the directory writeup_images
+5. An output video of the car driving autonomously in two tracks can be found in the directory [video](https://github.com/schandrachary/AutonomousVehicles/tree/behavioral_cloning/video)
+
