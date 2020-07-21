@@ -3,14 +3,14 @@ from scipy import ndimage
 import numpy as np
 import sklearn
 import cv2
-    
+
 dirPath = 'ShivData'
 lines = []
 with open(dirPath+'/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
     next(reader)
     for line in reader:
-        lines.append(line)       
+        lines.append(line)
 
 from sklearn.model_selection import train_test_split
 train_samples, validation_samples = train_test_split(lines, test_size=0.2)
@@ -25,41 +25,41 @@ def generator(samples,  batch_size=32):
             images = []
             angles = []
             # create adjusted steering measurements for the side camera images
-            correction = 0.2 # this is a parameter to tune            
-            
+            correction = 0.2 # this is a parameter to tune
+
             # process
             for batch_sample in batch_samples:
                 centerName = dirPath+'/IMG/'+batch_sample[0].split('/')[-1]
                 leftName = dirPath+'/IMG/'+batch_sample[1].split('/')[-1]
                 rightName = dirPath+'/IMG/'+batch_sample[2].split('/')[-1]
-                
+
                 # Grab center image and its corresponding steering wheel angle
                 center_image = ndimage.imread(centerName)
                 center_angle = float(batch_sample[3])
-                
+
                 # Grab left image and compute its steering wheel angle
                 left_image = ndimage.imread(leftName)
                 left_angle = center_angle + correction
-                
+
                 # Grab right image and compute its steering wheel angle
                 right_image = ndimage.imread(rightName)
                 right_angle = center_angle - correction
-                
+
                 images.append(center_image)
                 images.append(left_image)
                 images.append(right_image)
-                
+
                 angles.append(center_angle)
                 angles.append(left_angle)
-                angles.append(right_angle)            
-            
-            
-            # Store the images in a numpy array 
+                angles.append(right_angle)
+
+
+            # Store the images in a numpy array
             X_train = np.array(images)
             y_train = np.array(angles)
             yield sklearn.utils.shuffle(X_train, y_train)
-            
-            
+
+
 # Set our batch size
 batch_size=128
 
@@ -106,19 +106,16 @@ model.add(Dropout(0.35))
 # Flatten the layer
 model.add(Flatten())
 
-# Dropout layer - 2
-# model.add(Dropout(0.45))
-
 # Fully connected layer 1
 model.add(Dense(100))#, activation='relu'))
 
-# Dropout layer - 3
+# Dropout layer - 2
 model.add(Dropout(0.50))
 
 # Fully connected layer 2
 model.add(Dense(50))#, activation='relu'))
 
-# Dropout layer - 4
+# Dropout layer - 3
 model.add(Dropout(0.50))
 
 # Fully connected layer 3
