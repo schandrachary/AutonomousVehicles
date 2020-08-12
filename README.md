@@ -28,3 +28,14 @@ Udacity Nano-Degree program on Autonomous Vehicles
 4. The images used for the writeup can be found in the directory writeup_images
 5. An output video of the car driving autonomously in two tracks can be found in the directory [video](https://github.com/schandrachary/AutonomousVehicles/tree/behavioral_cloning/video)
 
+## Extended Kalman Filter
+1. Source code for EKF algorithm can be found in the[src](https://github.com/schandrachary/AutonomousVehicles/tree/ekf/CarND-Extended-Kalman-Filter-Project-master/src) directory
+2. Once the install for uWebSocketIO is complete, the main program can be built and run by doing the following from the project top directory.  
+   * mkdir build
+   * cd build
+   * cmake ..
+   * make
+   * ./ExtendedKF
+
+
+
