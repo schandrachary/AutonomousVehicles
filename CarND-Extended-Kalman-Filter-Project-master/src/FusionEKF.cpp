@@ -58,6 +58,10 @@ FusionEKF::FusionEKF() {
     // Process noises
     MatrixXd Q(4,4);
 
+    // Measurement matrix
+    H_laser_ << 1,0,0,0,
+                0,1,0,0;
+
 
     // Call the EFK init function to initialize matrices
     ekf_.Init(x, P, F, H_laser_, R_laser_, Q);
@@ -153,16 +157,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // TODO: Radar updates
     // Call the EFK init function to initialize matrices
-
-    // ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, Hj_, R_radar_, ekf_.Q_);
-    ekf_.H_ = Hj_;
     ekf_.R_ = R_radar_;
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
 
   } else {
     // Laser updates
     // Call the EFK init function to initialize matrices
-    // ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, H_laser_, R_laser_, ekf_.Q_);
     ekf_.H_ = H_laser_;
     ekf_.R_ = R_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
