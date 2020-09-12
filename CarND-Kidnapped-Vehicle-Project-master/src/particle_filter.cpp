@@ -62,15 +62,15 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
+    
+    // generate random noise
+    std::default_random_engine gen;
+    std::normal_distribution<double> dist_x(0,std_pos[0]);
+    std::normal_distribution<double> dist_y(0,std_pos[1]);
+    std::normal_distribution<double> dist_theta(0,std_pos[2]);
 
    for(auto& particle : particles)
    {
-       std::default_random_engine gen;
-       std::normal_distribution<double> dist_x(0,std_pos[0]);
-       std::normal_distribution<double> dist_y(0,std_pos[1]);
-       std::normal_distribution<double> dist_theta(0,std_pos[2]);
-
-
      // if the vehicle is not moving in the straight line
      if(fabs(yaw_rate) > 0.000001)
      {
@@ -81,16 +81,6 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
                                   - std::cos(particle.theta + (yaw_rate*delta_t)));
 
        particle.theta += (yaw_rate*delta_t);
-
-       // generate random noise
-       
-
-       // add noise to particle pose
-       /*
-       particle.x = dist_x(gen);
-       particle.y = dist_y(gen);
-       particle.theta = dist_theta(gen);
-       */
      }
 
      // if the vehicle is moving in straight line
@@ -104,16 +94,9 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
        std::normal_distribution<double> dist_x(particle.x,std_pos[0]);
        std::normal_distribution<double> dist_y(particle.y,std_pos[1]);
        std::normal_distribution<double> dist_theta(particle.theta,std_pos[2]);
-
-
-       // add noise to particle pose
-       /*
-       particle.x = dist_x(gen);
-       particle.y = dist_y(gen);
-       particle.theta = dist_theta(gen);
-       */
      }
        
+       // add noise to particle pose
        particle.x += dist_x(gen);
        particle.y += dist_y(gen);
        particle.theta += dist_theta(gen);
@@ -286,3 +269,4 @@ string ParticleFilter::getSenseCoord(Particle best, string coord) {
   s = s.substr(0, s.length()-1);  // get rid of the trailing space
   return s;
 }
+
