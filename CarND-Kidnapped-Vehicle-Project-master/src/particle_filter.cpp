@@ -31,7 +31,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
    * NOTE: Consult particle_filter.h for more information about this method
    *   (and others in this file).
    */
-  num_particles = 25;  // TODO: Set the number of particles
+  num_particles = 100;  // TODO: Set the number of particles
 
   std::default_random_engine gen;
   std::normal_distribution<double> dist_x(x,std[0]);
@@ -131,22 +131,26 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     for(auto& particle : particles)
     {
         // perform data association
-        vector<LandmarkObs> temp_observations = observations;
+        vector<LandmarkObs> temp_observations(observations.size());
         vector<LandmarkObs> associated_landmark(observations.size());
         particle.weight = 1;
         int iObservation = 0;
         
+        // For each particle, transform all its observation to global coordinates
         for(auto& observation : temp_observations)
         {
             // convert each observation from vehicle coordinate system to global coordinates
-            observation.x = particle.x + (std::cos(particle.theta)*observation.x)
-                                           - (std::sin(particle.theta)*observation.y);
-            observation.y = particle.y + (std::sin(particle.theta)*observation.x)
-                                           + (std::cos(particle.theta)*observation.y);
+            LandmarkObs observationVCS = observations.at(iObservation);
+            observation.x = particle.x + (std::cos(particle.theta)*observationVCS.x)
+                                           - (std::sin(particle.theta)*observationVCS.y);
+            observation.y = particle.y + (std::sin(particle.theta)*observationVCS.x)
+                                           + (std::cos(particle.theta)*observationVCS.y);
             // initialize observation id
             observation.id = -1;
              
             double shortest_distance = std::numeric_limits<double>::infinity();
+            
+            // For each observation, associate it to a landmark
             for(const auto& landmark : map_landmarks.landmark_list)
             {
                 double distance = dist(landmark.x_f, landmark.y_f, observation.x, observation.y);
@@ -162,9 +166,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                     associated_landmark.at(iObservation).id = landmark.id_i;
                     associated_landmark.at(iObservation).x = landmark.x_f;
                     associated_landmark.at(iObservation).y = landmark.y_f;
-                    //std::cout << "Distance to particle "<< iParticle << " is: "<<distance;
                 }
-             //std::cout << " Shortest distance for observation: "<< iObservation<< " is: " << shortest_distance <<std::endl;
             }
             
 
@@ -183,7 +185,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         
         //Update the weights vector
         weights.at(iParticle) = particle.weight;
-        std::cout << "Weight for particle "<< iParticle << " is: "<< particle.weight << std::endl;
+        //std::cout << "Weight of particle "<< iParticle << " is: "<< particle.weight << std::endl;
 
         // store the associated-landmark in vectors and set the association for each particle
         vector<int> associations(observations.size());
@@ -218,18 +220,9 @@ void ParticleFilter::resample() {
     
     for(auto iParticle=0; iParticle<particles.size(); ++iParticle)
     {
-        auto weight_chosen = dist_weights(gen);
-        std::cout << "Chosen weight: " << weight_chosen << std::endl;
-        resampled_particles.at(iParticle) = particles.at(weight_chosen);
+        resampled_particles.at(iParticle) = particles.at(dist_weights(gen));
     }
     particles = resampled_particles;
-//    std::cout << "Weights of chosen particles: " << std::endl;
-//    int i = 0;
-//    for(const auto& particle : particles)
-//    {
-//        std::cout << i << ". " << particle.weight << std::endl;
-//        i++;
-//    }
 }
 
 void ParticleFilter::SetAssociations(Particle& particle,
