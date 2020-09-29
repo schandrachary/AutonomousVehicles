@@ -56,8 +56,13 @@ int main() {
   // Start in lane 1
   int lane = 1;
 
-  h.onMessage([&ref_vel,&lane,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
-               &map_waypoints_dx,&map_waypoints_dy]
+  // Host lane vehicleObject_s
+  vehicleObject_s hostLaneObjects;
+  vehicleObject_s leftLaneObjects;
+  vehicleObject_s rightLaneObjects;
+
+  h.onMessage([&ref_vel,&lane,&hostLaneObjects,&leftLaneObjects,&rightLaneObjects,&map_waypoints_x,
+              &map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -103,7 +108,9 @@ int main() {
            int prev_size = previous_path_x.size();
 
 
-
+           /* --------------------------------------------------*/
+           /* ------------------Prediction----------------------*/
+           /* --------------------------------------------------*/
 
            /*
             Check sensor fusion for other cars on the road
@@ -116,10 +123,13 @@ int main() {
 
            // check if any car is in same lane and too close to us
            bool too_close = false;
+           bool vehicle_ahead = false;
            double check_speed = 0.0;
            for(int i=0; i<sensor_fusion.size(); ++i)
            {
              float d = sensor_fusion[i][6];
+
+             // Check for cars in the host lane
              if(d < (2+4*lane+2) && d > (2+4*lane-2))
              {
                double vx = sensor_fusion[i][3];
@@ -130,28 +140,80 @@ int main() {
                // With constant velocity, project s value to the end of the path
                // to predict where check_car will be in the future
                check_car_s += (double)prev_size*0.02*check_speed;
-               if((check_car_s > car_s) && (check_car_s - car_s) < 30)
+               if((check_car_s > car_s) && (check_car_s - car_s) < 45)
                {
-                 too_close = true;
-                 // ref_vel = 29.5;
+                 hostLaneObject.vehicle_ahead.speed = check_speed;
+                 hostLaneObject.vehicle_ahead.dist = check_car_s-car_s;
+                 hostLaneObject.vehicle_ahead.hostVehicleSpeed =
+                                          hostLaneObject.vehicle_ahead.dist/((prev_size+10)*0.02);
+                 vehicle_ahead = true;
+                 // too_close = true;
+                 // if(lane > 0)
+                 // {
+                 //   lane = 0;
+                 // }
                }
              }
+
+             // Check for cars in the left lane, if it exists
+             int left_lane = lane - 1;
+             else if(left_lane >= 0 && d < (2+4*left_lane+2) && d > (2+4*left_lane-2))
+             {
+               double vx = sensor_fusion[i][3];
+               double vy = sensor_fusion[i][4];
+               check_speed = sqrt(vx*vx + vy*vy);
+               double check_car_s = sensor_fusion[i][5];
+             }
+
+             // Check for cars in the right lane, if it exists
+             int right_lane = lane + 1;
+             else if (right_lane <=2 && d < (2+4*right_lane+2) && d > (2+4*right_lane-2))
+             {
+               double vx = sensor_fusion[i][3];
+               double vy = sensor_fusion[i][4];
+               check_speed = sqrt(vx*vx + vy*vy);
+               double check_car_s = sensor_fusion[i][5];
+             }
+
            }
 
            // Reset the position of the car to current car's s position
            car_s = j[1]["s"];
 
            // If too close, slow down by 10mph
-           if(too_close)
+           float max_cutoff = 30;
+           float min_cutoff = 10;
+           if(vehicle_ahead)
            {
-             ref_vel -= 0.124;
-             // ref_vel = check_speed;
+             // If lead vehicle detected, slow down
+             if(hostLaneObject.vehicle_ahead.dist < max_cutoff &&
+               hostLaneObject.vehicle_ahead.hostVehicleSpeed > hostLaneObject.vehicle_ahead.speed)
+             {
+               ref_vel -= 0.094;
+               // ref_vel = check_speed;
+             }
+             // If lead vehicle is further away and host vehicle is slower, keep accelerating
+             else if(hostLaneObject.vehicle_ahead.dist > min_cutoff &&
+                    hostLaneObject.vehicle_ahead.hostVehicleSpeed < hostLaneObject.vehicle_ahead.speed)
+             {
+               ref_vel +=0.094;
+             }
+             // If the lead vehicle is dangerously close, match the speed
+             else if(hostLaneObject.vehicle_ahead.dist < min_cutoff)
+             {
+               ref_vel = hostLaneObject.vehicle_ahead.speed;
+             }
            }
+
            // If we are slow, speed up by 10 mph
            else if(ref_vel < 49.5)
            {
              ref_vel += 0.224;
            }
+
+           /* --------------------------------------------------*/
+           /* ------------------Trajectory generation-----------*/
+           /* --------------------------------------------------*/
 
            // Create a list of sparsedly spced (x,y) waypoints
            vector<double> ptsx;
@@ -194,7 +256,7 @@ int main() {
              ptsy.push_back(ref_y);
            }
 
-           // Add evenly distributed points at 30m
+           // Add evenly distributed points at 30m intervals
            vector<double> next_wp0 = getXY(car_s+30, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
            vector<double> next_wp1 = getXY(car_s+60, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
            vector<double> next_wp2 = getXY(car_s+90, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
@@ -267,18 +329,6 @@ int main() {
              next_x_vals.push_back(x_point);
              next_y_vals.push_back(y_point);
            }
-
-          // double dist_inc = 0.5;
-          // for (int i = 0; i < 50; ++i)
-          // {
-          //   double next_s = car_s+(i+1)*dist_inc;
-          //   double next_d = 6;
-          //   vector<double> xy = getXY(next_s, next_d, map_waypoints_s, map_waypoints_x, map_waypoints_y);
-          //   next_x_vals.push_back(xy[0]);
-          //   next_y_vals.push_back(xy[1]);
-          // }
-
-
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
