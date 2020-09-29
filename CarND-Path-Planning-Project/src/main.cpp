@@ -121,64 +121,86 @@ int main() {
              car_s = end_path_s;
            }
 
+           // Reset distance values to a max number
+           hostLaneObjects.vehicle_ahead.dist = 9999;
+           hostLaneObjects.vehicle_behind.dist = 9999;
+           leftLaneObjects.vehicle_ahead.dist = 9999;
+           leftLaneObjects.vehicle_behind.dist = 9999;
+           rightLaneObjects.vehicle_ahead.dist = 9999;
+           rightLaneObjects.vehicle_behind.dist = 9999;
+
            // check if any car is in same lane and too close to us
-           bool too_close = false;
            bool vehicle_ahead = false;
            double check_speed = 0.0;
            for(int i=0; i<sensor_fusion.size(); ++i)
            {
              float d = sensor_fusion[i][6];
+             double vx = sensor_fusion[i][3];
+             double vy = sensor_fusion[i][4];
+             check_speed = sqrt(vx*vx + vy*vy);
+             double check_car_s = sensor_fusion[i][5];
+
+             // Predict where the car will be in the future
+             check_car_s += (double)prev_size*0.02*check_speed;
 
              // Check for cars in the host lane
              if(d < (2+4*lane+2) && d > (2+4*lane-2))
              {
-               double vx = sensor_fusion[i][3];
-               double vy = sensor_fusion[i][4];
-               check_speed = sqrt(vx*vx + vy*vy);
-               double check_car_s = sensor_fusion[i][5];
-
-               // With constant velocity, project s value to the end of the path
-               // to predict where check_car will be in the future
-               check_car_s += (double)prev_size*0.02*check_speed;
-               if((check_car_s > car_s) && (check_car_s - car_s) < 45)
+               if((check_car_s > car_s) && (check_car_s - car_s) < 30)
                {
-                 hostLaneObject.vehicle_ahead.speed = check_speed;
-                 hostLaneObject.vehicle_ahead.dist = check_car_s-car_s;
-                 hostLaneObject.vehicle_ahead.hostVehicleSpeed =
-                                          hostLaneObject.vehicle_ahead.dist/((prev_size+10)*0.02);
+                 hostLaneObjects.vehicle_ahead.speed = check_speed;
+                 hostLaneObjects.vehicle_ahead.dist = check_car_s-car_s;
+                 hostLaneObjects.vehicle_ahead.hostVehicleSpeed =
+                                          hostLaneObjects.vehicle_ahead.dist/((prev_size+10)*0.02);
                  vehicle_ahead = true;
-                 // too_close = true;
-                 // if(lane > 0)
-                 // {
-                 //   lane = 0;
-                 // }
                }
              }
 
              // Check for cars in the left lane, if it exists
              int left_lane = lane - 1;
-             else if(left_lane >= 0 && d < (2+4*left_lane+2) && d > (2+4*left_lane-2))
+             if(left_lane >= 0 && d < (2+4*left_lane+2) && d > (2+4*left_lane-2))
              {
-               double vx = sensor_fusion[i][3];
-               double vy = sensor_fusion[i][4];
-               check_speed = sqrt(vx*vx + vy*vy);
-               double check_car_s = sensor_fusion[i][5];
+               // if(check_car_s > car_s)
+               // {
+               //   std::cout << "vehicle in left lane and ahead at:  " << check_car_s - car_s << "m\n";
+               // }
+
+               // grab the closest leading vehicle ahead
+               if(check_car_s > car_s && leftLaneObjects.vehicle_ahead.dist > check_car_s - car_s)
+               {
+                 leftLaneObjects.vehicle_ahead.dist = check_car_s - car_s;
+                 std::cout << "shortest dist selected in left lane and ahead at:  " << leftLaneObjects.vehicle_ahead.dist << "m\n";
+               }
+
+               // For vehicle behind
+               else if(car_s > check_car_s && leftLaneObjects.vehicle_behind.dist > car_s - check_car_s)
+               {
+                 leftLaneObjects.vehicle_behind.dist = car_s - check_car_s;
+                 std::cout << "shortest dist selected in left lane and behind at:  " << leftLaneObjects.vehicle_behind.dist << "m\n";
+               }
+
              }
 
              // Check for cars in the right lane, if it exists
              int right_lane = lane + 1;
-             else if (right_lane <=2 && d < (2+4*right_lane+2) && d > (2+4*right_lane-2))
+             if (right_lane <=2 && d < (2+4*right_lane+2) && d > (2+4*right_lane-2))
              {
-               double vx = sensor_fusion[i][3];
-               double vy = sensor_fusion[i][4];
-               check_speed = sqrt(vx*vx + vy*vy);
-               double check_car_s = sensor_fusion[i][5];
+               // grab the closest leading vehicle ahead
+               if(check_car_s > car_s && rightLaneObjects.vehicle_ahead.dist > check_car_s - car_s)
+               {
+                 rightLaneObjects.vehicle_ahead.dist = check_car_s - car_s;
+                 std::cout << "shortest dist selected in right lane and ahead at:  " << rightLaneObjects.vehicle_ahead.dist << "m\n";
+               }
+
+               // For vehicle behind
+               else if(car_s > check_car_s && rightLaneObjects.vehicle_behind.dist > car_s - check_car_s)
+               {
+                 rightLaneObjects.vehicle_behind.dist = car_s - check_car_s;
+                 std::cout << "shortest dist selected in right lane and behind at:  " << rightLaneObjects.vehicle_behind.dist << "m\n";
+               }
              }
 
            }
-
-           // Reset the position of the car to current car's s position
-           car_s = j[1]["s"];
 
            // If too close, slow down by 10mph
            float max_cutoff = 30;
@@ -186,23 +208,43 @@ int main() {
            if(vehicle_ahead)
            {
              // If lead vehicle detected, slow down
-             if(hostLaneObject.vehicle_ahead.dist < max_cutoff &&
-               hostLaneObject.vehicle_ahead.hostVehicleSpeed > hostLaneObject.vehicle_ahead.speed)
+             if(hostLaneObjects.vehicle_ahead.dist < max_cutoff &&
+               hostLaneObjects.vehicle_ahead.hostVehicleSpeed > hostLaneObjects.vehicle_ahead.speed)
              {
-               ref_vel -= 0.094;
-               // ref_vel = check_speed;
+               ref_vel -= 0.114;
              }
              // If lead vehicle is further away and host vehicle is slower, keep accelerating
-             else if(hostLaneObject.vehicle_ahead.dist > min_cutoff &&
-                    hostLaneObject.vehicle_ahead.hostVehicleSpeed < hostLaneObject.vehicle_ahead.speed)
+             else if(hostLaneObjects.vehicle_ahead.dist > min_cutoff &&
+                    hostLaneObjects.vehicle_ahead.hostVehicleSpeed < hostLaneObjects.vehicle_ahead.speed &&
+                    hostLaneObjects.vehicle_ahead.hostVehicleSpeed < 49.5)
              {
                ref_vel +=0.094;
              }
              // If the lead vehicle is dangerously close, match the speed
-             else if(hostLaneObject.vehicle_ahead.dist < min_cutoff)
+             else if(hostLaneObjects.vehicle_ahead.dist < min_cutoff)
              {
-               ref_vel = hostLaneObject.vehicle_ahead.speed;
+               ref_vel = hostLaneObjects.vehicle_ahead.speed;
              }
+
+             // If there is a left lane, look for a gap
+             int left_lane = lane - 1;
+             int right_lane = lane + 1;
+             if(left_lane >= 0 &&
+               leftLaneObjects.vehicle_behind.dist > 5 &&
+               leftLaneObjects.vehicle_ahead.dist > 30)
+             {
+               //std::cout << "\nlane change suggested: " << left_lane;
+               lane = left_lane;
+             }
+            // Otherwise, look for a gap in the right lane
+            else if(right_lane <= 2 &&
+                    rightLaneObjects.vehicle_behind.dist > 5 &&
+                    rightLaneObjects.vehicle_ahead.dist > 30)
+            {
+              //std::cout << "\nlane change suggested: " << right_lane;
+              lane = right_lane;
+            }
+
            }
 
            // If we are slow, speed up by 10 mph
@@ -214,6 +256,9 @@ int main() {
            /* --------------------------------------------------*/
            /* ------------------Trajectory generation-----------*/
            /* --------------------------------------------------*/
+
+           // Reset the position of the car to current car's s position
+           car_s = j[1]["s"];
 
            // Create a list of sparsedly spced (x,y) waypoints
            vector<double> ptsx;
@@ -300,7 +345,7 @@ int main() {
            }
 
            // Calculate how to break up spline points so that we travel at our desired reference velocity
-           double target_x = 30.0;
+           double target_x = 40.0;
            double target_y = s(target_x);
            double target_dist = sqrt((target_x*target_x) + (target_y*target_y));
 

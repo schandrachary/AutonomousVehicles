@@ -159,6 +159,12 @@ struct objectAttributes_s
   double speed;
   double dist;
   double hostVehicleSpeed;
+
+  objectAttributes_s() : speed(0),
+  dist(9999),
+  hostVehicleSpeed(0)
+  {
+  }
 };
 
 struct vehicleObject_s
