@@ -259,7 +259,7 @@ int main() {
            /* --------------------------------------------------*/
 
            // Reset the position of the car to current car's s position
-           car_s = j[1]["s"];
+           //car_s = j[1]["s"];
 
            // Create a list of sparsedly spced (x,y) waypoints
            vector<double> ptsx;
@@ -273,7 +273,7 @@ int main() {
            //If previous size is almost empty, use the car as starting points
            if(prev_size < 2)
            {
-             //Use two points taht make the path tangent to the car
+             //Use two points that make the path tangent to the car
              double prev_car_x = car_x - cos(car_yaw);
              double prev_car_y = car_y - sin(car_yaw);
 
@@ -282,6 +282,39 @@ int main() {
 
              ptsy.push_back(prev_car_y);
              ptsy.push_back(car_y);
+           }
+           // If there are more points available, add them
+           else if(prev_size > 10)
+           {
+             // Redefine reference states to be previous path end points
+             ref_x = previous_path_x[prev_size-1];
+             ref_y = previous_path_y[prev_size-1];
+
+             double ref_x_prev10 = previous_path_x[prev_size-10];
+             double ref_y_prev10 = previous_path_y[prev_size-10];
+
+             double ref_x_prev8 = previous_path_x[prev_size-8];
+             double ref_y_prev8 = previous_path_y[prev_size-8];
+
+             double ref_x_prev5 = previous_path_x[prev_size-5];
+             double ref_y_prev5 = previous_path_y[prev_size-5];
+
+             double ref_x_prev = previous_path_x[prev_size-2];
+             double ref_y_prev = previous_path_y[prev_size-2];
+             ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev);
+
+             // Use two points that make the path tangent to the previous path's end point
+             ptsx.push_back(ref_x_prev10);
+             ptsx.push_back(ref_x_prev8);
+             ptsx.push_back(ref_x_prev5);
+             ptsx.push_back(ref_x_prev);
+             ptsx.push_back(ref_x);
+
+             ptsy.push_back(ref_y_prev10);
+             ptsy.push_back(ref_y_prev8);
+             ptsy.push_back(ref_y_prev5);
+             ptsy.push_back(ref_y_prev);
+             ptsy.push_back(ref_y);
            }
            // Otherwise, use prevous path's end point as starting Reference
            else
@@ -294,28 +327,41 @@ int main() {
              double ref_y_prev = previous_path_y[prev_size-2];
              ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev);
 
-             // Use two points that make the path tangent to the previous path's end point
+             // Push x points
              ptsx.push_back(ref_x_prev);
              ptsx.push_back(ref_x);
 
+             // Push y points
              ptsy.push_back(ref_y_prev);
              ptsy.push_back(ref_y);
            }
 
-           // Add evenly distributed points at 30m intervals
-           vector<double> next_wp0 = getXY(car_s+30, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           vector<double> next_wp1 = getXY(car_s+60, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           vector<double> next_wp2 = getXY(car_s+90, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           // Add evenly distributed points at 10m intervals
+           vector<double> next_wp0 = getXY(car_s+20, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp1 = getXY(car_s+30, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp2 = getXY(car_s+40, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp3 = getXY(car_s+50, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp4 = getXY(car_s+60, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp5 = getXY(car_s+70, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp6 = getXY(car_s+90, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
 
            // Push x-waypoint
            ptsx.push_back(next_wp0[0]);
            ptsx.push_back(next_wp1[0]);
            ptsx.push_back(next_wp2[0]);
+           ptsx.push_back(next_wp3[0]);
+           ptsx.push_back(next_wp4[0]);
+           ptsx.push_back(next_wp5[0]);
+           ptsx.push_back(next_wp6[0]);
 
            // Push y-waypoint
            ptsy.push_back(next_wp0[1]);
            ptsy.push_back(next_wp1[1]);
            ptsy.push_back(next_wp2[1]);
+           ptsy.push_back(next_wp3[1]);
+           ptsy.push_back(next_wp4[1]);
+           ptsy.push_back(next_wp5[1]);
+           ptsy.push_back(next_wp6[1]);
 
            // convert the waypoints to vehicle coordinates
            for(int i = 0; i < ptsx.size(); ++i)
@@ -346,7 +392,7 @@ int main() {
            }
 
            // Calculate how to break up spline points so that we travel at our desired reference velocity
-           double target_x = 40.0;
+           double target_x = 30.0;
            double target_y = s(target_x);
            double target_dist = sqrt((target_x*target_x) + (target_y*target_y));
 
