@@ -160,23 +160,18 @@ int main() {
              int left_lane = lane - 1;
              if(left_lane >= 0 && d < (2+4*left_lane+2) && d > (2+4*left_lane-2))
              {
-               // if(check_car_s > car_s)
-               // {
-               //   std::cout << "vehicle in left lane and ahead at:  " << check_car_s - car_s << "m\n";
-               // }
-
                // grab the closest leading vehicle ahead
                if(check_car_s > car_s && leftLaneObjects.vehicle_ahead.dist > check_car_s - car_s)
                {
                  leftLaneObjects.vehicle_ahead.dist = check_car_s - car_s;
-                 std::cout << "shortest dist selected in left lane and ahead at:  " << leftLaneObjects.vehicle_ahead.dist << "m\n";
+                 // std::cout << "shortest dist selected in left lane and ahead at:  " << leftLaneObjects.vehicle_ahead.dist << "m\n";
                }
 
                // For vehicle behind
                else if(car_s > check_car_s && leftLaneObjects.vehicle_behind.dist > car_s - check_car_s)
                {
                  leftLaneObjects.vehicle_behind.dist = car_s - check_car_s;
-                 std::cout << "shortest dist selected in left lane and behind at:  " << leftLaneObjects.vehicle_behind.dist << "m\n";
+                 // std::cout << "shortest dist selected in left lane and behind at:  " << leftLaneObjects.vehicle_behind.dist << "m\n";
                }
 
              }
@@ -189,14 +184,14 @@ int main() {
                if(check_car_s > car_s && rightLaneObjects.vehicle_ahead.dist > check_car_s - car_s)
                {
                  rightLaneObjects.vehicle_ahead.dist = check_car_s - car_s;
-                 std::cout << "shortest dist selected in right lane and ahead at:  " << rightLaneObjects.vehicle_ahead.dist << "m\n";
+                 // std::cout << "shortest dist selected in right lane and ahead at:  " << rightLaneObjects.vehicle_ahead.dist << "m\n";
                }
 
                // For vehicle behind
                else if(car_s > check_car_s && rightLaneObjects.vehicle_behind.dist > car_s - check_car_s)
                {
                  rightLaneObjects.vehicle_behind.dist = car_s - check_car_s;
-                 std::cout << "shortest dist selected in right lane and behind at:  " << rightLaneObjects.vehicle_behind.dist << "m\n";
+                 // std::cout << "shortest dist selected in right lane and behind at:  " << rightLaneObjects.vehicle_behind.dist << "m\n";
                }
              }
 
@@ -211,14 +206,20 @@ int main() {
              if(hostLaneObjects.vehicle_ahead.dist < max_cutoff &&
                hostLaneObjects.vehicle_ahead.hostVehicleSpeed > hostLaneObjects.vehicle_ahead.speed)
              {
-               ref_vel -= 0.114;
+               double leading_vehicle_dist = hostLaneObjects.vehicle_ahead.dist;
+               double velocityScaleFactor = 1/(1+leading_vehicle_dist/6) + 0.3;
+               // ref_vel -= 0.114;
+               ref_vel -= 0.224*velocityScaleFactor;
              }
              // If lead vehicle is further away and host vehicle is slower, keep accelerating
              else if(hostLaneObjects.vehicle_ahead.dist > min_cutoff &&
                     hostLaneObjects.vehicle_ahead.hostVehicleSpeed < hostLaneObjects.vehicle_ahead.speed &&
                     hostLaneObjects.vehicle_ahead.hostVehicleSpeed < 49.5)
              {
-               ref_vel +=0.094;
+               // ref_vel +=0.094;
+               double leading_vehicle_dist = hostLaneObjects.vehicle_ahead.dist;
+               double velocityScaleFactor = 0.8 - 1/(1+leading_vehicle_dist/6);
+               ref_vel += 0.224*velocityScaleFactor;
              }
              // If the lead vehicle is dangerously close, match the speed
              else if(hostLaneObjects.vehicle_ahead.dist < min_cutoff)
