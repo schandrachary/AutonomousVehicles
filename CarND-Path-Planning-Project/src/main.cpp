@@ -128,6 +128,7 @@ int main() {
            leftLaneObjects.vehicle_behind.dist = 9999;
            rightLaneObjects.vehicle_ahead.dist = 9999;
            rightLaneObjects.vehicle_behind.dist = 9999;
+           double predictedHostSpeed = 0;
 
            // check if any car is in same lane and too close to us
            bool vehicle_ahead = false;
@@ -150,8 +151,7 @@ int main() {
                {
                  hostLaneObjects.vehicle_ahead.speed = check_speed;
                  hostLaneObjects.vehicle_ahead.dist = check_car_s-car_s;
-                 hostLaneObjects.vehicle_ahead.hostVehicleSpeed =
-                                          hostLaneObjects.vehicle_ahead.dist/((prev_size+10)*0.02);
+                 predictedHostSpeed = hostLaneObjects.vehicle_ahead.dist/((prev_size+10)*0.02);
                  vehicle_ahead = true;
                }
              }
@@ -204,7 +204,7 @@ int main() {
            {
              // If lead vehicle detected, slow down
              if(hostLaneObjects.vehicle_ahead.dist < max_cutoff &&
-               hostLaneObjects.vehicle_ahead.hostVehicleSpeed > hostLaneObjects.vehicle_ahead.speed)
+               predictedHostSpeed > hostLaneObjects.vehicle_ahead.speed)
              {
                double leading_vehicle_dist = hostLaneObjects.vehicle_ahead.dist;
                double velocityScaleFactor = 1/(1+leading_vehicle_dist/6) + 0.3;
@@ -213,8 +213,8 @@ int main() {
              }
              // If lead vehicle is further away and host vehicle is slower, keep accelerating
              else if(hostLaneObjects.vehicle_ahead.dist > min_cutoff &&
-                    hostLaneObjects.vehicle_ahead.hostVehicleSpeed < hostLaneObjects.vehicle_ahead.speed &&
-                    hostLaneObjects.vehicle_ahead.hostVehicleSpeed < 49.0)
+                    predictedHostSpeed < hostLaneObjects.vehicle_ahead.speed &&
+                    predictedHostSpeed < 49.0)
              {
                // ref_vel +=0.094;
                double leading_vehicle_dist = hostLaneObjects.vehicle_ahead.dist;
@@ -337,13 +337,10 @@ int main() {
            }
 
            // Add evenly distributed points at 10m intervals
-           // vector<double> next_wp0 = getXY(car_s+20, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
            vector<double> next_wp0 = getXY(car_s+35, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
            vector<double> next_wp1 = getXY(car_s+40, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
            vector<double> next_wp2 = getXY(car_s+60, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
            vector<double> next_wp3 = getXY(car_s+80, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           // vector<double> next_wp5 = getXY(car_s+70, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           // vector<double> next_wp6 = getXY(car_s+90, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
 
            // Push x-waypoint
            ptsx.push_back(next_wp0[0]);
