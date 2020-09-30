@@ -209,17 +209,17 @@ int main() {
                double leading_vehicle_dist = hostLaneObjects.vehicle_ahead.dist;
                double velocityScaleFactor = 1/(1+leading_vehicle_dist/6) + 0.3;
                // ref_vel -= 0.114;
-               ref_vel -= 0.224*velocityScaleFactor;
+               ref_vel -= 0.220*velocityScaleFactor;
              }
              // If lead vehicle is further away and host vehicle is slower, keep accelerating
              else if(hostLaneObjects.vehicle_ahead.dist > min_cutoff &&
                     hostLaneObjects.vehicle_ahead.hostVehicleSpeed < hostLaneObjects.vehicle_ahead.speed &&
-                    hostLaneObjects.vehicle_ahead.hostVehicleSpeed < 49.5)
+                    hostLaneObjects.vehicle_ahead.hostVehicleSpeed < 49.0)
              {
                // ref_vel +=0.094;
                double leading_vehicle_dist = hostLaneObjects.vehicle_ahead.dist;
                double velocityScaleFactor = 0.8 - 1/(1+leading_vehicle_dist/6);
-               ref_vel += 0.224*velocityScaleFactor;
+               ref_vel += 0.220*velocityScaleFactor;
              }
              // If the lead vehicle is dangerously close, match the speed
              else if(hostLaneObjects.vehicle_ahead.dist < min_cutoff)
@@ -231,7 +231,7 @@ int main() {
              int left_lane = lane - 1;
              int right_lane = lane + 1;
              if(left_lane >= 0 &&
-               leftLaneObjects.vehicle_behind.dist > 5 &&
+               leftLaneObjects.vehicle_behind.dist > 8 &&
                leftLaneObjects.vehicle_ahead.dist > 30)
              {
                //std::cout << "\nlane change suggested: " << left_lane;
@@ -239,7 +239,7 @@ int main() {
              }
             // Otherwise, look for a gap in the right lane
             else if(right_lane <= 2 &&
-                    rightLaneObjects.vehicle_behind.dist > 5 &&
+                    rightLaneObjects.vehicle_behind.dist > 8 &&
                     rightLaneObjects.vehicle_ahead.dist > 30)
             {
               //std::cout << "\nlane change suggested: " << right_lane;
@@ -251,7 +251,7 @@ int main() {
            // If we are slow, speed up by 10 mph
            else if(ref_vel < 49.5)
            {
-             ref_vel += 0.224;
+             ref_vel += 0.220;
            }
 
            /* --------------------------------------------------*/
@@ -337,31 +337,25 @@ int main() {
            }
 
            // Add evenly distributed points at 10m intervals
-           vector<double> next_wp0 = getXY(car_s+20, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           vector<double> next_wp1 = getXY(car_s+30, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           vector<double> next_wp2 = getXY(car_s+40, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           vector<double> next_wp3 = getXY(car_s+50, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           vector<double> next_wp4 = getXY(car_s+60, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           vector<double> next_wp5 = getXY(car_s+70, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           vector<double> next_wp6 = getXY(car_s+90, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           // vector<double> next_wp0 = getXY(car_s+20, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp0 = getXY(car_s+35, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp1 = getXY(car_s+40, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp2 = getXY(car_s+60, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp3 = getXY(car_s+80, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           // vector<double> next_wp5 = getXY(car_s+70, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           // vector<double> next_wp6 = getXY(car_s+90, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
 
            // Push x-waypoint
            ptsx.push_back(next_wp0[0]);
            ptsx.push_back(next_wp1[0]);
            ptsx.push_back(next_wp2[0]);
            ptsx.push_back(next_wp3[0]);
-           ptsx.push_back(next_wp4[0]);
-           ptsx.push_back(next_wp5[0]);
-           ptsx.push_back(next_wp6[0]);
 
            // Push y-waypoint
            ptsy.push_back(next_wp0[1]);
            ptsy.push_back(next_wp1[1]);
            ptsy.push_back(next_wp2[1]);
            ptsy.push_back(next_wp3[1]);
-           ptsy.push_back(next_wp4[1]);
-           ptsy.push_back(next_wp5[1]);
-           ptsy.push_back(next_wp6[1]);
 
            // convert the waypoints to vehicle coordinates
            for(int i = 0; i < ptsx.size(); ++i)
