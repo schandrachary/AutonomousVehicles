@@ -2,18 +2,12 @@
 #define BEHAVIORPLANNING_H
 
 #include "helpers.h"
-using std::vector;
 
 void switchLanes(int& hostLane, const vector<vehicleObject_s>& predictedObjects,
                 const double predictedHostSpeed, double& ref_vel,
                 vector<double>& anchorPoints)
 {
   bool leading_vehicle_ahead = predictedObjects[hostLane].vehicle_ahead.dist < 30;
-
-  // leftLaneObjects = predictedObjects.at(lane_e::LEFT);
-  // middleLaneObjects = predictedObjects.at(lane_e::MIDDLE);
-  // rightLaneObjects = predictedObjects.at(lane_e::RIGHT);
-  // std::cout << "Vehicle ahead dist: " << predictedObjects[hostLane].vehicle_ahead.dist<< std::endl;
 
    if(leading_vehicle_ahead)
    {

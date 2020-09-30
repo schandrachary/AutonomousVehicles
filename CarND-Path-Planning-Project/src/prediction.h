@@ -6,6 +6,10 @@
 
 using std::vector;
 
+/*
+ Check sensor fusion for other cars on the road
+*/
+
 vector<vehicleObject_s> predictObjects(const vector<vector<double>>& sensor_fusion,
                                        const int prev_size, const double car_s,
                                        double& predictedHostSpeed)
@@ -46,8 +50,7 @@ vector<vehicleObject_s> predictObjects(const vector<vector<double>>& sensor_fusi
         leftLaneObjects.vehicle_ahead.speed = check_speed;
 
         // Calculate predicted host speed wrt to leading vehicle
-        predictedHostSpeed = leftLaneObjects.vehicle_ahead.dist/((prev_size)*0.02);
-        // std::cout << "shortest dist selected in left lane and ahead at:  " << leftLaneObjects.vehicle_ahead.dist << "m\n";
+        predictedHostSpeed = leftLaneObjects.vehicle_ahead.dist/((prev_size)*0.02);        
       }
 
       // For vehicle behind
@@ -55,7 +58,6 @@ vector<vehicleObject_s> predictObjects(const vector<vector<double>>& sensor_fusi
       {
         leftLaneObjects.vehicle_behind.dist = object_distance;
         leftLaneObjects.vehicle_behind.speed = check_speed;
-        // std::cout << "shortest dist selected in left lane and behind at:  " << leftLaneObjects.vehicle_behind.dist << "m\n";
       }
     }
 
@@ -70,7 +72,6 @@ vector<vehicleObject_s> predictObjects(const vector<vector<double>>& sensor_fusi
 
         // Calculate predicted host speed wrt to leading vehicle
         predictedHostSpeed = leftLaneObjects.vehicle_ahead.dist/((prev_size+10)*0.02);
-        // std::cout << "shortest dist selected in left lane and ahead at:  " << leftLaneObjects.vehicle_ahead.dist << "m\n";
       }
 
       // For vehicle behind
@@ -78,7 +79,6 @@ vector<vehicleObject_s> predictObjects(const vector<vector<double>>& sensor_fusi
       {
         middleLaneObjects.vehicle_behind.dist = object_distance;
         middleLaneObjects.vehicle_behind.speed = check_speed;
-        // std::cout << "shortest dist selected in left lane and behind at:  " << leftLaneObjects.vehicle_behind.dist << "m\n";
       }
     }
 
@@ -93,7 +93,6 @@ vector<vehicleObject_s> predictObjects(const vector<vector<double>>& sensor_fusi
 
         // Calculate predicted host speed wrt to leading vehicle
         predictedHostSpeed = leftLaneObjects.vehicle_ahead.dist/((prev_size+10)*0.02);
-        // std::cout << "shortest dist selected in left lane and ahead at:  " << leftLaneObjects.vehicle_ahead.dist << "m\n";
       }
 
       // For vehicle behind
@@ -101,7 +100,6 @@ vector<vehicleObject_s> predictObjects(const vector<vector<double>>& sensor_fusi
       {
         rightLaneObjects.vehicle_behind.dist = object_distance;
         rightLaneObjects.vehicle_behind.speed = check_speed;
-        // std::cout << "shortest dist selected in left lane and behind at:  " << leftLaneObjects.vehicle_behind.dist << "m\n";
       }
     } // end if
 

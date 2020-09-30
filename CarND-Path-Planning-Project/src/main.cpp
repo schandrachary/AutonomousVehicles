@@ -114,9 +114,6 @@ int main() {
            /* ------------------Prediction----------------------*/
            /* --------------------------------------------------*/
 
-           /*
-            Check sensor fusion for other cars on the road
-           */
            // project the location of the car to the end of the path
            if(prev_size > 0)
            {
@@ -125,10 +122,12 @@ int main() {
 
            double predictedHostSpeed = 0;
            vector<double> anchorPoints{35, 50, 65};
-           // double firstAnchorPoint = 35;
-           // double secondAnchorPoint = 45;
            vector<vehicleObject_s> predictedObjects =
             predictObjects(sensor_fusion, prev_size, car_s, predictedHostSpeed);
+
+            /* --------------------------------------------------*/
+            /* ------------------Behavior Planning---------------*/
+            /* --------------------------------------------------*/
 
            switchLanes(lane, predictedObjects, predictedHostSpeed, ref_vel, anchorPoints);
            if(anchorPoints[0] != 35)
@@ -136,143 +135,9 @@ int main() {
              std::cout << "First anchor point changed to: " << anchorPoints[0] << std::endl;
            }
 
-           // Reset distance values to a max number
-           // hostLaneObjects.vehicle_ahead.dist = 9999;
-           // hostLaneObjects.vehicle_behind.dist = 9999;
-           // leftLaneObjects.vehicle_ahead.dist = 9999;
-           // leftLaneObjects.vehicle_behind.dist = 9999;
-           // rightLaneObjects.vehicle_ahead.dist = 9999;
-           // rightLaneObjects.vehicle_behind.dist = 9999;
-
-
-           // check if any car is in same lane and too close to us
-           // bool vehicle_ahead = false;
-           // double check_speed = 0.0;
-           // for(int i=0; i<sensor_fusion.size(); ++i)
-           // {
-           //   float d = sensor_fusion[i][6];
-           //   double vx = sensor_fusion[i][3];
-           //   double vy = sensor_fusion[i][4];
-           //   check_speed = sqrt(vx*vx + vy*vy);
-           //   double check_car_s = sensor_fusion[i][5];
-           //
-           //   // Predict where the car will be in the future
-           //   check_car_s += (double)prev_size*0.02*check_speed;
-           //
-           //   // Check for cars in the host lane
-           //   if(d < (2+4*lane+2) && d > (2+4*lane-2))
-           //   {
-           //     if((check_car_s > car_s) && (check_car_s - car_s) < 30)
-           //     {
-           //       hostLaneObjects.vehicle_ahead.speed = check_speed;
-           //       hostLaneObjects.vehicle_ahead.dist = check_car_s-car_s;
-           //       predictedHostSpeed = hostLaneObjects.vehicle_ahead.dist/((prev_size+10)*0.02);
-           //       vehicle_ahead = true;
-           //     }
-           //   }
-
-             // Check for cars in the left lane, if it exists
-             /*int left_lane = lane - 1;
-             if(left_lane >= 0 && d < (2+4*left_lane+2) && d > (2+4*left_lane-2))
-             {
-               // grab the closest leading vehicle ahead
-               if(check_car_s > car_s && leftLaneObjects.vehicle_ahead.dist > check_car_s - car_s)
-               {
-                 leftLaneObjects.vehicle_ahead.dist = check_car_s - car_s;
-                 // std::cout << "shortest dist selected in left lane and ahead at:  " << leftLaneObjects.vehicle_ahead.dist << "m\n";
-               }
-
-               // For vehicle behind
-               else if(car_s > check_car_s && leftLaneObjects.vehicle_behind.dist > car_s - check_car_s)
-               {
-                 leftLaneObjects.vehicle_behind.dist = car_s - check_car_s;
-                 // std::cout << "shortest dist selected in left lane and behind at:  " << leftLaneObjects.vehicle_behind.dist << "m\n";
-               }
-
-             }
-
-             // Check for cars in the right lane, if it exists
-             int right_lane = lane + 1;
-             if (right_lane <=2 && d < (2+4*right_lane+2) && d > (2+4*right_lane-2))
-             {
-               // grab the closest leading vehicle ahead
-               if(check_car_s > car_s && rightLaneObjects.vehicle_ahead.dist > check_car_s - car_s)
-               {
-                 rightLaneObjects.vehicle_ahead.dist = check_car_s - car_s;
-                 // std::cout << "shortest dist selected in right lane and ahead at:  " << rightLaneObjects.vehicle_ahead.dist << "m\n";
-               }
-
-               // For vehicle behind
-               else if(car_s > check_car_s && rightLaneObjects.vehicle_behind.dist > car_s - check_car_s)
-               {
-                 rightLaneObjects.vehicle_behind.dist = car_s - check_car_s;
-                 // std::cout << "shortest dist selected in right lane and behind at:  " << rightLaneObjects.vehicle_behind.dist << "m\n";
-               }
-             }*/
-
-           //}
-
-           // If too close, slow down by 10mph
-           // float max_cutoff = 30;
-           // float min_cutoff = 10;
-           // if(vehicle_ahead)
-           // {
-           //   // If lead vehicle detected, slow down
-           //   if(hostLaneObjects.vehicle_ahead.dist < max_cutoff &&
-           //     predictedHostSpeed > hostLaneObjects.vehicle_ahead.speed)
-           //   {
-           //     double leading_vehicle_dist = hostLaneObjects.vehicle_ahead.dist;
-           //     double velocityScaleFactor = 1/(1+leading_vehicle_dist/6) + 0.3;
-           //     // ref_vel -= 0.114;
-           //     ref_vel -= 0.220*velocityScaleFactor;
-           //   }
-           //   // If lead vehicle is further away and host vehicle is slower, keep accelerating
-           //   else if(hostLaneObjects.vehicle_ahead.dist > min_cutoff &&
-           //          predictedHostSpeed < hostLaneObjects.vehicle_ahead.speed &&
-           //          predictedHostSpeed < 49.0)
-           //   {
-           //     // ref_vel +=0.094;
-           //     double leading_vehicle_dist = hostLaneObjects.vehicle_ahead.dist;
-           //     double velocityScaleFactor = 0.8 - 1/(1+leading_vehicle_dist/6);
-           //     ref_vel += 0.220*velocityScaleFactor;
-           //   }
-           //   // If the lead vehicle is dangerously close, match the speed
-           //   else if(hostLaneObjects.vehicle_ahead.dist < min_cutoff)
-           //   {
-           //     ref_vel = hostLaneObjects.vehicle_ahead.speed;
-           //   }
-           //
-           //   // If there is a left lane, look for a gap
-           //   int left_lane = lane - 1;
-           //   int right_lane = lane + 1;
-           //   if(left_lane >= 0 &&
-           //     leftLaneObjects.vehicle_behind.dist > 8 &&
-           //     leftLaneObjects.vehicle_ahead.dist > 30)
-           //   {
-           //     //std::cout << "\nlane change suggested: " << left_lane;
-           //     lane = left_lane;
-           //   }
-           //  // Otherwise, look for a gap in the right lane
-           //  else if(right_lane <= 2 &&
-           //          rightLaneObjects.vehicle_behind.dist > 8 &&
-           //          rightLaneObjects.vehicle_ahead.dist > 30)
-           //  {
-           //    //std::cout << "\nlane change suggested: " << right_lane;
-           //    lane = right_lane;
-           //  }
-           //
-           // }
-           //
-           // // If we are slow, speed up by 10 mph increments
-           // else if(ref_vel < 49.5)
-           // {
-           //   ref_vel += 0.220;
-           // }
-
            /* --------------------------------------------------*/
            /* ------------------Trajectory generation-----------*/
            /* --------------------------------------------------*/
-
 
            // Create a list of sparsedly spced (x,y) waypoints
            vector<double> ptsx;
