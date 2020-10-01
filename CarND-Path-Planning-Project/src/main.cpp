@@ -121,7 +121,8 @@ int main() {
            }
 
            double predictedHostSpeed = 0;
-           vector<double> anchorPoints{35, 50, 65};
+           vector<double> anchorPoints_s{35, 50, 65};
+           vector<int> anchorPoints_d{2+4*lane, 2+4*lane, 2+4*lane};
            vector<vehicleObject_s> predictedObjects =
             predictObjects(sensor_fusion, prev_size, car_s, predictedHostSpeed);
 
@@ -129,10 +130,10 @@ int main() {
             /* ------------------Behavior Planning---------------*/
             /* --------------------------------------------------*/
 
-           switchLanes(lane, predictedObjects, predictedHostSpeed, ref_vel, anchorPoints);
-           if(anchorPoints[0] != 35)
+           switchLanes(lane, predictedObjects, predictedHostSpeed, ref_vel, anchorPoints_s, anchorPoints_d);
+           if(anchorPoints_s[1] != 50)
            {
-             std::cout << "First anchor point changed to: " << anchorPoints[0] << std::endl;
+             std::cout << "Second anchor point changed to: " << anchorPoints_s[1] << std::endl;
            }
 
            /* --------------------------------------------------*/
@@ -215,22 +216,19 @@ int main() {
            }
 
            // Add evenly distributed points at 10m intervals
-           vector<double> next_wp0 = getXY(car_s+anchorPoints[0], (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           vector<double> next_wp1 = getXY(car_s+anchorPoints[1], (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           vector<double> next_wp2 = getXY(car_s+anchorPoints[2], (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
-           vector<double> next_wp3 = getXY(car_s+90, (2+4*lane), map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp0 = getXY(car_s+anchorPoints_s[0], anchorPoints_d[0], map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp1 = getXY(car_s+anchorPoints_s[1], anchorPoints_d[1], map_waypoints_s, map_waypoints_x,  map_waypoints_y);
+           vector<double> next_wp2 = getXY(car_s+anchorPoints_s[2], anchorPoints_d[2], map_waypoints_s, map_waypoints_x,  map_waypoints_y);
 
            // Push x-waypoint
            ptsx.push_back(next_wp0[0]);
            ptsx.push_back(next_wp1[0]);
            ptsx.push_back(next_wp2[0]);
-           ptsx.push_back(next_wp3[0]);
 
            // Push y-waypoint
            ptsy.push_back(next_wp0[1]);
            ptsy.push_back(next_wp1[1]);
            ptsy.push_back(next_wp2[1]);
-           ptsy.push_back(next_wp3[1]);
 
            // convert the waypoints to vehicle coordinates
            for(int i = 0; i < ptsx.size(); ++i)
