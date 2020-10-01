@@ -1,6 +1,25 @@
 # AutonomousVehicles
 Udacity Nano-Degree program on Autonomous Vehicles
 
+## Path Planning
+---
+
+![ezgif com-optimize](https://user-images.githubusercontent.com/8539470/94864071-72130d00-0409-11eb-898b-7ad755ce8f80.gif)
+
+
+### Goal
+The goal of this project is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. Provided is the car's localization and sensor fusion data, there is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 10 m/s^3.
+
+### Basic Build Instructions
+1. Clone this repo.
+2. Make a build directory: mkdir build && cd build
+3. Compile: cmake .. && make
+4. Run it: ./path_planning.
+
+
+
+
+![pass-2lanes-480p](https://user-images.githubusercontent.com/8539470/94862945-b0a7c800-0407-11eb-999d-7dba75e88f1e.gif)
 ## Lane Line Detection
 
 1. Finding lane lines on the road project is located [here](https://github.com/schandrachary/AutonomousVehicles/tree/finding_lane_lines/Fundamentals_of_computer_vision/CarND-LaneLines-P1-master).
