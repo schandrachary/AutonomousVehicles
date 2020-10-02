@@ -215,7 +215,7 @@ int main() {
              ptsy.push_back(ref_y);
            }
 
-           // Add evenly distributed points at 10m intervals
+           // Add more anchor points
            vector<double> next_wp0 = getXY(car_s+anchorPoints_s[0], anchorPoints_d[0], map_waypoints_s, map_waypoints_x,  map_waypoints_y);
            vector<double> next_wp1 = getXY(car_s+anchorPoints_s[1], anchorPoints_d[1], map_waypoints_s, map_waypoints_x,  map_waypoints_y);
            vector<double> next_wp2 = getXY(car_s+anchorPoints_s[2], anchorPoints_d[2], map_waypoints_s, map_waypoints_x,  map_waypoints_y);
