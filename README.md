@@ -38,7 +38,7 @@ Udacity Nano-Degree program on Autonomous Vehicles
    * ./ExtendedKF
    
 ## Particle Filter
-1. The source code for this project can be located [here](https://github.com/schandrachary/AutonomousVehicles/tree/particle_filter/CarND-Kidnapped-Vehicle-Project-master/src)
+1. The source code for this project is located [here](https://github.com/schandrachary/AutonomousVehicles/tree/particle_filter/CarND-Kidnapped-Vehicle-Project-master/src)
 2. On the parent directory, clean.sh cleans the build
 3. build.sh, builds the project
 4. On successful build, the project can be run using run.sh
@@ -47,7 +47,10 @@ Udacity Nano-Degree program on Autonomous Vehicles
 7. The project is marked successful if the error is within range and the car completes three loops within 100 seconds
 
 
-
+## Path Planning
+1. The source code for this project is located [here](https://github.com/schandrachary/AutonomousVehicles/tree/path_planning/CarND-Path-Planning-Project/src)
+2. Please take a look at the [Read me](https://github.com/schandrachary/AutonomousVehicles/tree/path_planning) for this project, located on the main page of the path_planning branch.
+3. Read me contains the build instructions and algorithm overview. 
 
 
 
