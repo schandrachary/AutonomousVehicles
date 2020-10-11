@@ -1,6 +1,10 @@
 #ifndef PID_H
 #define PID_H
 
+#include <array>
+
+using std::vector;
+
 class PID {
  public:
   /**
@@ -31,6 +35,18 @@ class PID {
    */
   double TotalError();
 
+  /**
+   * Parameter optmization method
+   * @param p Base parameter value
+   * @param dp Probing value
+  */
+
+  void Twiddle(double error);
+
+  void ParameterTuner(int index, double value);
+
+
+
  private:
   /**
    * PID Errors
@@ -47,7 +63,18 @@ class PID {
   double Kd;
 
   // Previous cte
-  double prev_cte = 0;
+  double prev_cte;
+
+  // Parameter tuning variables
+  double best_error;
+  double total_error;
+  int evaluation_steps;
+  int counter;
+  int p_index;
+  bool increase;
+  bool decrease;
+  std::array<double, 3> p;
+
 };
 
 #endif  // PID_H
