@@ -45,6 +45,10 @@ class PID {
 
   void ParameterTuner(int index, double value);
 
+  float clip(float n, float lower, float upper) {
+  return std::max(lower, std::min(n, upper));
+}
+
 
 
  private:
@@ -66,6 +70,7 @@ class PID {
   double prev_cte;
 
   // Parameter tuning variables
+  bool use_twiddle;
   double best_error;
   double total_error;
   int evaluation_steps;

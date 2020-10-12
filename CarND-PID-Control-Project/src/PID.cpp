@@ -30,8 +30,9 @@ void PID::Init(double Kp_, double Ki_, double Kd_) {
    best_error = std::numeric_limits<double>::max();
    total_error = 0;
 
-   // Parameter tuning variables
-   evaluation_steps = 100;
+   // Turn on twiddle and tune the parameters
+   use_twiddle = true;
+   evaluation_steps = 200;
    counter = 1;
    p_index = 0;
    increase = false;
@@ -40,7 +41,6 @@ void PID::Init(double Kp_, double Ki_, double Kd_) {
    p.at(0) = 0.2 * Kp;
    p.at(1) = 0.2 * Ki;
    p.at(2) = 0.2 * Kd;
-
 }
 
 void PID::UpdateError(double cte) {
@@ -138,5 +138,4 @@ void PID::ParameterTuner(int index, double value)
     default:
       break;
   }
-
 }
