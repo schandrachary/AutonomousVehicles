@@ -1,56 +1,75 @@
-# AutonomousVehicles
-Udacity Nano-Degree program on Autonomous Vehicles
+# PID Controller
+Control the steering and throttle using PID algorithm
 
-## Lane Line Detection
+## Objective
+1. Write a PID controller in C++ that can drive the car around the track in the Udacity's simulator
+2. Tune the hyperparameters so that the car drives smoothly around the track
+3. Implement a parameter optmization algorithm that can tune the parameters continuously
+4. Increase the speed of the car upto 100 mph or its breaking point
 
-1. Finding lane lines on the road project is located [here](https://github.com/schandrachary/AutonomousVehicles/tree/finding_lane_lines/Fundamentals_of_computer_vision/CarND-LaneLines-P1-master).
-2. The first part of the challenge, which includes detecting the lane lines and extrapolating the segmented lines to a solid line and running lane detection pipeline on a video stream can be found in [FindingLaneLines.py](https://github.com/schandrachary/AutonomousVehicles/blob/finding_lane_lines/Fundamentals_of_computer_vision/CarND-LaneLines-P1-master/FindingLaneLines.py)
-3. The second part of the challenge, which include detecting the lane lines for curved lane scenraio can be found in [curvedLaneFinding.py](https://github.com/schandrachary/AutonomousVehicles/blob/finding_lane_lines/Fundamentals_of_computer_vision/CarND-LaneLines-P1-master/curvedLaneFinding.py)
+### Algorithm Overview:
+PID controller is a basic type of controller used to achieve a steady state of a system. This works as a feedback loop with the system returning a Cross Track Error (CTE) and the PID algorithm working towards minimizing that error.
 
-## Advanced Lane Line Finding
+The equation for PID is given by:
 
-1. Source code for Advanced Lane Line finding algorithm is found [here](https://github.com/schandrachary/AutonomousVehicles/tree/advanced_computer_vision/Advanced%20Computer%20Vision/CarND-Advanced-Lane-Lines-master/source)
-2. Output images from the algorithm are saved [here](https://github.com/schandrachary/AutonomousVehicles/tree/advanced_computer_vision/Advanced%20Computer%20Vision/CarND-Advanced-Lane-Lines-master/output_images)
-3. Follow the [writeup](https://github.com/schandrachary/AutonomousVehicles/blob/advanced_computer_vision/Advanced%20Computer%20Vision/CarND-Advanced-Lane-Lines-master/writeup_template.md) here to get a brief explanation of the algorithm and how to run the code
+&alpha; = -&tau;</sub>p _CTE_  - &tau;</sub>i _CTE_ - &tau;</sub>d _CTE_
 
-## Traffic Sign Classifier
-
-1. This project was developed on Ipython notebook and it located [here](https://github.com/schandrachary/AutonomousVehicles/tree/traffic_sign_classifier/CarND-Traffic-Sign-Classifier-Project)
-2. The test images downloaded from web to test on the model is located [here](https://github.com/schandrachary/AutonomousVehicles/tree/traffic_sign_classifier/CarND-Traffic-Sign-Classifier-Project/test_images)
-3. The writeup for this project is located [here](https://github.com/schandrachary/AutonomousVehicles/blob/traffic_sign_classifier/CarND-Traffic-Sign-Classifier-Project/writeup_traffic_sign_recognition.md)
-4. Note that the pickle file with augmented data set is not uploaded on the repository due to file size constraints. If you want to download this project and run, please contact me.
-
-## Behavioral Cloning
-
-1. Source code for this project and its neural network architecture can be found inside [source](https://github.com/schandrachary/AutonomousVehicles/tree/behavioral_cloning/source) directory
-2. Data used to train the model can be found inside [data](https://github.com/schandrachary/AutonomousVehicles/tree/behavioral_cloning/data) directory
-3. A writeup for this project can be in the markdown file named writeup_behavioral_cloning
-4. The images used for the writeup can be found in the directory writeup_images
-5. An output video of the car driving autonomously in two tracks can be found in the directory [video](https://github.com/schandrachary/AutonomousVehicles/tree/behavioral_cloning/video)
-
-## Extended Kalman Filter
-1. Source code for EKF algorithm can be found in the [src](https://github.com/schandrachary/AutonomousVehicles/tree/ekf/CarND-Extended-Kalman-Filter-Project-master/src) directory
-2. Once the install for uWebSocketIO is complete, the main program can be built and run by doing the following from the project top directory.  
-   * mkdir build
-   * cd build
-   * cmake ..
-   * make
-   * ./ExtendedKF
-   
-## Particle Filter
-1. The source code for this project is located [here](https://github.com/schandrachary/AutonomousVehicles/tree/particle_filter/CarND-Kidnapped-Vehicle-Project-master/src)
-2. On the parent directory, clean.sh cleans the build
-3. build.sh, builds the project
-4. On successful build, the project can be run using run.sh
-5. Turn on the simulator and navigate to "Kidnapped Vehicle" simulation and hit the start button
-6. You should see blue and green lines almost align with each-other marking coherence to groundtruth
-7. The project is marked successful if the error is within range and the car completes three loops within 100 seconds
+Where:
+ - &tau;</sub>p is the Proportional component of the &alpha;
+ - &tau;</sub>i is the Integral component of the &alpha;
+ - &tau;</sub>d is the Derivative component of the &alpha;  
+ - &alpha; is the total error that is passed back to the system
 
 
-## Path Planning
-1. The source code for this project is located [here](https://github.com/schandrachary/AutonomousVehicles/tree/path_planning/CarND-Path-Planning-Project/src)
-2. Please take a look at the [Read me](https://github.com/schandrachary/AutonomousVehicles/tree/path_planning) for this project, located on the main page of the path_planning branch.
-3. Read me contains the build instructions and algorithm overview. 
+Proportional component of the &alpha; is responsible towards returning a value that directory reduces
+the CTE for that moment in time. While this is great in bringing down the CTE instantly, it also causes overshoot and results in an oscillation.   
 
+To counteract these oscillations, Derivative part of the &alpha; works as a resistance to the Proportional component and pulls the system away from sudden change in the CTE value. This helps reduce the oscillation in the system.
 
+Integral part of the &alpha; only comes into play when the system reaches a steady state error. One of the reason this might occur is if the system has a constant bias which pulls the system away from converging. In this scenario, the accumulated error from the integral part will help the system converge.
 
+### Parameter Optmization
+
+As a first step, I went on to manually tune the parameters to get a best state estimate of a stable system. At first, I set all the other parameters to zero. Then,
+- I started to increase the Proportional part of PID controller from `0` up until the car in the simulator started oscillating. I chose a value of `0.085` for steering control and `0.2` for throttle control.
+
+- Once I found a starting value for Proportional controller, I increased Derivative part up until the car stopped oscillating. This was around `3.0` for steering control and `0.045` for throttle control.
+
+- The Integral controller is largely unused since the simulator did not have any systemic bias. Therefore I chose a small value of `0.0001` for have minimal influence on this system.
+
+After settling on a base set of values from the above approach, it was time to implement an algorithm that would continuously tune the parameters based on CTE for that time. Introducing **Twiddle**.
+
+Twiddle algorithm tunes each of the hyperparameters to minimize the CTE. I have set the test loop in PID.cpp for 200 cycles, meaning, each tuned parameter runs for 200 cycles and then Twiddle checks if the tuned parameter is good enough. If it is good, it keeps the value, otherwise, it increases or decreases the value by a small probing amount and tests again.
+
+### Result
+
+My code runs on two modes. One with a constant acceleration of 0.35 which keeps the vehicle at about 35 mph and the other with an initial throttle value of 0.85 which achieves the speeds up to 85 mph. Toggle the `fast_mode` in `main.cpp` to switch either one or the other.
+
+![clip_optmized](https://user-images.githubusercontent.com/8539470/95699192-d0ae6700-0c11-11eb-9a05-474314bed6bf.gif)
+
+### Future Work
+
+In the fast mode the car picks up velocity in the straightaway (especially when the CTE is close to zero) and doesn't account for the upcoming sharp turn. This causes the car to react too late for the turn and bumps over the curb. An insight of the map of the track would be really helpful in modeling the throttle parameter.
+
+## Dependencies
+
+* cmake >= 3.5
+ * All OSes: [click here for installation instructions](https://cmake.org/install/)
+* make >= 4.1(mac, linux), 3.81(Windows)
+  * Linux: make is installed by default on most Linux distros
+  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
+  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
+* gcc/g++ >= 5.4
+  * Linux: gcc / g++ is installed by default on most Linux distros
+  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
+  * Windows: recommend using [MinGW](http://www.mingw.org/)
+* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
+  * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
+  * If you install from source, checkout to commit `e94b6e1`, i.e.
+    ```
+    git clone https://github.com/uWebSockets/uWebSockets
+    cd uWebSockets
+    git checkout e94b6e1
+    ```
+    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
+* Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
