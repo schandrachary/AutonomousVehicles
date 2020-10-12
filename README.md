@@ -1,5 +1,5 @@
-# AutonomousVehicles
-Udacity Nano-Degree program on Autonomous Vehicles
+# Autonomous Vehicles Nano Degree 
+Udacity Nano-Degree program on Autonomous Vehicles. There are several projects in this nanodegree and each project has its own branch. All of these branches can be found within [AutonomousVehicles](https://github.com/schandrachary/AutonomousVehicles) repository. Listed below is brief description of each of those projects. 
 
 ## Lane Line Detection
 
@@ -49,8 +49,12 @@ Udacity Nano-Degree program on Autonomous Vehicles
 
 ## Path Planning
 1. The source code for this project is located [here](https://github.com/schandrachary/AutonomousVehicles/tree/path_planning/CarND-Path-Planning-Project/src)
-2. Please take a look at the [Read me](https://github.com/schandrachary/AutonomousVehicles/tree/path_planning) for this project, located on the main page of the path_planning branch.
-3. Read me contains the build instructions and algorithm overview. 
+2. Please take a look at the [Readme](https://github.com/schandrachary/AutonomousVehicles/tree/path_planning) for this project, located on the main page of the path_planning branch
+3. Read me contains the build instructions and algorithm overview
+
+## PID Controller
+1. The souce code for this project is located [here](https://github.com/schandrachary/AutonomousVehicles/tree/pid_control/CarND-PID-Control-Project/src)
+2. Please take a look at the [Readme](https://github.com/schandrachary/AutonomousVehicles/blob/pid_control/README.md) for this project to get an overview of PID controller's implementation details
 
 
 
