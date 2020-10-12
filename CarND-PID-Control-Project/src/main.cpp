@@ -35,26 +35,29 @@ int main() {
 
   PID pid_steer;
   PID pid_throttle;
+  bool fast_mode = false;
+  double target_throttle;
+
+  if(fast_mode)
+  {
+    target_throttle = 0.85;
+    pid_steer.Init(0.085, 0.0001, 3.0);
+    pid_throttle.Init(0.2, 0.0001, 0.045);
+  }
+  else
+  {
+    target_throttle = 0.35;
+    pid_steer.Init(0.085, 0.0001, 3.0);
+    pid_throttle.Init(0.0, 0.0, 0.0);
+  }
   // double target_throttle = 0.85;
-  double target_throttle = 0.35;
+
   /**
    * TODO: Initialize the pid variable.
    */
    // pid_steer.Init(0.1, 0.0001, 3.0);
    // pid_throttle.Init(0.3, 0.0001, 0.08);
 
-   if( target_throttle < 0.4)
-   {
-     pid_steer.Init(0.085, 0.0001, 3.0);
-     pid_throttle.Init(0.0, 0.0, 0.0);
-
-   }
-   else
-   {
-     pid_steer.Init(0.085, 0.0001, 3.0);
-     pid_throttle.Init(0.2, 0.0001, 0.045);
-   }
-   
   h.onMessage([&pid_steer, &pid_throttle, &target_throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
