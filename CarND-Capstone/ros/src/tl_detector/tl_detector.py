@@ -8,11 +8,15 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from light_classification.tl_classifier import TLClassifier
 from scipy.spatial import KDTree
+fromt WaypointUpdater import distance
 import tf
 import cv2
 import yaml
+import numpy as np
+import PyKDL
 
 STATE_COUNT_THRESHOLD = 3
+ENABLE_TEST_MODE = False
 
 class TLDetector(object):
     def __init__(self):
@@ -79,8 +83,8 @@ class TLDetector(object):
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
 
-	rospy.logwarn("Upcoming traffic light at index: {} is {}".format(light_wp, state))
-	
+	    # rospy.logwarn("Upcoming traffic light at index: {} is {}".format(light_wp, state))
+
 
         '''
         Publish upcoming red lights at camera frequency.
@@ -114,6 +118,48 @@ class TLDetector(object):
         closest_idx = self.waypoint_tree.query([x, y], 1)[1]
         return closest_idx
 
+    def global_to_camera_coordinates(self, global_pos):
+        """ Project a point from global space to camera coordinates
+
+        Args:
+            position (Point): 3D position of traffic light in global coordinates
+
+        Returns:
+            x (int): X coordinate of traffic light in image coordinates
+            y (int): Y coordinate of traffic light in image coordinates
+        """
+
+        focal_length_x = self.config['camera_info']['focal_length_x']
+        focal_length_y = self.config['camera_info']['focal_length_y']
+        image_width = self.config['camera_info']['image_width']
+        image_height = self.config['camera_info']['image_height']
+
+        translation = None
+        rotation = None
+
+        try:
+            now = rospy.Time.now()
+            self.listener.waitForTransform("/base_link", "/world", now, rospy.Duration(1.0))
+            (translation, rotation) = self.listener.lookupTransform("/base_link", "/world", now)
+
+        except (tf.Exception):
+            rospy.logerr("global_to_camera_coordinates() - Transformation Failed!")
+
+        # HYPERPARAMETERS
+        focal_point = 2300
+        x_offset = -30
+        y_offset = 340
+
+        global_position = PyKDL.Vector(global_pos.x, global_pos.y, global_pos.z)
+        rotated_camera = PyKDL.Rotation.Quaternion(*rotation)
+        translated_camera = PyKDL.Vector(*translation)
+        position_camera = rotated_camera * global_position + translated_camera
+
+        x = -position_camera[1]/position_camera[0] * focal_point + image_width/2 + x_offset
+        y = -position_camera[2]/position_camera[0] * focal_point + image_height/2 + y_offset
+
+        return (int(x), int(y))
+
     def get_light_state(self, light):
         """Determines the current color of the traffic light
 
@@ -133,7 +179,27 @@ class TLDetector(object):
         # #Get classification
         # return self.light_classifier.get_classification(cv_image)
 
-        return light.state
+        if ENABLE_TEST_MODE:
+            return light.state
+        else:
+            cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+            x, y = global_to_camera_coordinates(light.pose.pose.position)
+
+            # If the transformed coordinates are outside of the image, return unknown
+            if (x < 0) or (y < 0) or (x >= cv_image.shape[1]) or (y >= cv_image.shape[0]):
+                return TrafficLight.UNKNOWN
+
+            # Crop the image around the traffic light
+            cropping_value = 90
+            x_min = x - cropping_value if (x - cropping_value) >= 0 else 0
+            y_min = y - cropping_value if (y - cropping_value) >=0 else 0
+            x_max = x + cropping_value if (x + cropping_value) <= cv_image.shape[1] else cv_image.shape[1]
+            y_max = y + cropping_value if (y + cropping_value) <= cv_image.shape[0] else cv_image.shape[0]
+
+            image_cropped = cv_image[y_min:y_max, x_min:x_max]
+
+            # Get classification
+            return self.light_classifier.get_classification(image_cropped)
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
@@ -167,8 +233,12 @@ class TLDetector(object):
                     line_wp_idx = temp_wp_idx
 
         if closest_light:
-            state = self.get_light_state(closest_light)
-            return line_wp_idx, state
+            # If the light is within 50 meters, call the classifier to look for detection
+            if distance(self.waypoints.waypoints, car_wp_idx, line_wp_idx) < 50:
+                state = self.get_light_state(closest_light)
+                return line_wp_idx, state
+            else:
+                return line_wp_idx, TrafficLight.UNKNOWN
 
         return -1, TrafficLight.UNKNOWN
 
