@@ -96,7 +96,7 @@ Specific to these libraries, the simulator grader and Carla use the following:
 
 The system architecture can be subdivided into four major components: Sensors, Perception, Planning and Control. Here is an high level architecture diagram:
 
-![alt_text](/imgs/systemArch1.png)
+![alt_text](./imgs/systemArch1.png)
 
 **Sensors:** There are many different kinds of sensors that an Autonomous Vehicle is equipped with, some of the well known and crucial ones are: _Camera, Radar, Lidar and GPS_. The data from these sensors are to be published at a frequency that can enable high level behavior planning and perception related computations with shortest latency to observe the current model of the world.
 
@@ -115,7 +115,7 @@ Localization module takes in GPS data and other on-board sensor data, along with
 
 The following is a system architecture diagram showing the ROS nodes and topics used in the project.
 
-![alt_text](/imgs/ros-graph.png)
+![alt_text](./imgs/ros-graph.png)
 
 #### Waypoint Updater Node:
 The purpose of this node is to update the target velocity property of each waypoint based on traffic light and obstacle detection data. This node will subscribe to the `/base_waypoints`, `/current_pose`, `/obstacle_waypoint`, and `/traffic_waypoint` topics, and publish a list of waypoints ahead of the car with target velocities to the `/final_waypoints` topic.
@@ -136,7 +136,7 @@ The simulator consists of many traffic lights throughout the track. The topic `/
 
 At this point, we know the location of the traffic light in world coordinates. When camera captures this traffic light, we need to be able to associate this location with its location on the camera image. First the position of the traffic light is translated and rotated  to convert it to position in camera coordinates. But this will be a flipped image as we are using pin-hole camera model as shown below.
 
-![alt_text](/imgs/pinhole-model.png)
+![alt_text](./imgs/pinhole-model.png)
 
 With carefully tuned hyperparameter coefficients, I transform the image from world coordintes to camera coordinates. Note that a quick google search revealed the base hyperparameters and I had to tune it to work with my camera model.
 
@@ -145,8 +145,8 @@ Once we know the location of traffic light in camera coordinates, we can crop th
 ##### Classification
 The RGB image is converted to HSV image. We are interested in only Hue value of the this image. Hue represent the color independent of any change in brightness. A bright red or a dar red has the same hue value. But looking for a threshold of within the range of Red, Green and Yellow pixels, we can determine the state of the traffic light. An example of Red traffic light separated from hue and converted to grayscale is show below:
 
-![alt_text](/ros/src/tl_detector/light_classification/data/redLight.png)
-![alt_text](/ros/src/tl_detector/light_classification/data/red_hValue.png)
+![alt_text](./ros/src/tl_detector/light_classification/data/redLight.png)
+![alt_text](./ros/src/tl_detector/light_classification/data/red_hValue.png)
 
 ##### Waypoint Publishing
 
