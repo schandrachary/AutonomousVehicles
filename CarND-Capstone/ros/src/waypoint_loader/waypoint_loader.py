@@ -52,8 +52,9 @@ class WaypointLoader(object):
                 q = self.quaternion_from_yaw(float(wp['yaw']))
                 p.pose.pose.orientation = Quaternion(*q)
                 p.twist.twist.linear.x = float(self.velocity)
-
                 waypoints.append(p)
+
+#	rospy.logwarn("Velocity set to:{} mps".format(self.velocity))
         return self.decelerate(waypoints)
 
     def distance(self, p1, p2):
