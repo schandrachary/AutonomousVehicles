@@ -156,4 +156,6 @@ Once the state of the light is determined, the stop line waypoints and state of 
 
 Traffic light detector and classifier only works in the simulator as this setup needs the location of the traffic light in world coordinates. With this setup, the vehicle in the simulator follows the waypoints and the desired velocity and stops at red light promptly.
 
-In the future, I plan to combine the classical computer vision techniques I used for classifying the traffic light with neural network approach so the detection and classification is robust and can be scalable. 
+In the future, I plan to combine the classical computer vision techniques I used for classifying the traffic light with neural network approach so the detection and classification is robust and can be scalable.
+
+[Here](https://youtu.be/AQ7hin4k33A) is a link to a short clip for demonstration.
