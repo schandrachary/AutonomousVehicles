@@ -56,5 +56,10 @@ Udacity Nano-Degree program on Autonomous Vehicles. There are several projects i
 1. The souce code for this project is located [here](https://github.com/schandrachary/AutonomousVehicles/tree/pid_control/CarND-PID-Control-Project/src)
 2. Please take a look at the [Readme](https://github.com/schandrachary/AutonomousVehicles/blob/pid_control/README.md) for this project to get an overview of PID controller's implementation details
 
+## Capstone Project
+1. Navigate to the [main page](https://github.com/schandrachary/AutonomousVehicles/tree/capstone/CarND-Capstone) and review the Readme before continuing
+2. All the ROS nodes responsible for running this project are located in the [src](https://github.com/schandrachary/AutonomousVehicles/tree/capstone/CarND-Capstone/ros/src) directory
+3. Follow Readme to download and run this project
+
 
 
