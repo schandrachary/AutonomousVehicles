@@ -13,6 +13,7 @@ import cv2
 import yaml
 import numpy as np
 import PyKDL
+import math
 
 STATE_COUNT_THRESHOLD = 3
 ENABLE_TEST_MODE = False
@@ -182,7 +183,7 @@ class TLDetector(object):
             return light.state
         else:
             cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-            x, y = global_to_camera_coordinates(light.pose.pose.position)
+            x, y = self.global_to_camera_coordinates(light.pose.pose.position)
 
             # If the transformed coordinates are outside of the image, return unknown
             if (x < 0) or (y < 0) or (x >= cv_image.shape[1]) or (y >= cv_image.shape[0]):
@@ -241,8 +242,10 @@ class TLDetector(object):
 
         if closest_light:
             # If the light is within 50 meters, call the classifier to look for detection
-            if self.distance(self.waypoints.waypoints, car_wp_idx, line_wp_idx) < 50:
+            dist =  self.distance(self.waypoints.waypoints, car_wp_idx, line_wp_idx)
+	    if dist < 80:
                 state = self.get_light_state(closest_light)
+		rospy.logwarn("Distance to TL: {} and state is: {}".format(dist, state))
                 return line_wp_idx, state
             else:
                 return line_wp_idx, TrafficLight.UNKNOWN
