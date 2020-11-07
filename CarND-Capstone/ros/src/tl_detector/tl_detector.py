@@ -8,7 +8,6 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from light_classification.tl_classifier import TLClassifier
 from scipy.spatial import KDTree
-fromt WaypointUpdater import distance
 import tf
 import cv2
 import yaml
@@ -201,6 +200,14 @@ class TLDetector(object):
             # Get classification
             return self.light_classifier.get_classification(image_cropped)
 
+    def distance(self, waypoints, wp1, wp2):
+        dist = 0
+        dl = lambda a, b: math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
+        for i in range(wp1, wp2+1):
+            dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
+            wp1 = i
+        return dist
+
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
             location and color
@@ -234,7 +241,7 @@ class TLDetector(object):
 
         if closest_light:
             # If the light is within 50 meters, call the classifier to look for detection
-            if distance(self.waypoints.waypoints, car_wp_idx, line_wp_idx) < 50:
+            if self.distance(self.waypoints.waypoints, car_wp_idx, line_wp_idx) < 50:
                 state = self.get_light_state(closest_light)
                 return line_wp_idx, state
             else:
